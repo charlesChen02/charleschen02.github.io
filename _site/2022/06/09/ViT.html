@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    ViT and PCT Notes - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/06/09/ViT.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>ViT and PCT Notes</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on June 09, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   3 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p><img src="./image-20220607134751772.png" alt="image-20220607134751772" /></p>
+
+<h1 id="vision-transformer-vit">Vision Transformer (ViT)</h1>
+
+<p>Reshape the image $ x \in R^{H * W * C}$ into flattened 2D patches $x_{p} \in R^{N * (P^2 C)}$</p>
+
+<p>$(H, W)$ the resolution of original image, $C$ channels, $(P,P)$ resolution for each image patch.</p>
+
+<p>$N=HW / P^2$ the resulting number of patches.</p>
+
+<p>Position Embeddings are added to the patch embeddings to retain positional information.</p>
+
+<!-- more -->
+<h2 id="inductive-bias">Inductive bias</h2>
+
+<p>ViT has much less image-specific inductive bias than CNNs.</p>
+
+<p>Only MLP layers are local and translationally equivariant, while the self-attention layers are global.</p>
+
+<h2 id="hybrid-architecture">Hybrid Architecture</h2>
+
+<p>The input sequence can be formed from feature maps of a CNN.</p>
+
+<p>The patch embedding project is applied to patches from CNN feature map.</p>
+
+<h2 id="fine-tuning-and-higher-resolution">Fine-Tuning and Higher Resolution</h2>
+
+<p>The paper found that it performs better to fine-tune at higher resolution than pre-training.</p>
+
+<p>The ViT can handle arbitrary sequence lengths but the pre-trained position embeddings may no longer be meaningful.</p>
+
+<h1 id="point-cloud-transformer-pct">Point Cloud Transformer PCT</h1>
+
+<p><img src="./image-20220607145127660.png" alt="image-20220607145127660" /></p>
+
+<h2 id="encoder">Encoder</h2>
+
+<ol>
+  <li>Embedding the input coordinates into a new feature space.</li>
+  <li>Feed embedded features into 4 stacked attention module.
+    <ul>
+      <li>To learn semantically rich and discriminative representation for each point</li>
+    </ul>
+  </li>
+  <li>A Linear layer to generate the output feature.</li>
+</ol>
+
+<p>Compared to Ordinary Transformer:</p>
+
+<ul>
+  <li>Share the same philosophy of design</li>
+  <li>Positional embedding discarded, because coordinates already contains this info.</li>
+</ul>
+
+<p>Formally:</p>
+
+<p><img src="./image-20220607150042747.png" alt="image-20220607150042747" /></p>
+
+<p>$F_e$ feature embedding for the point clouds.</p>
+
+<p>$AT^i$ $i$_th attention layer.</p>
+
+<p>$W_o$ weight for the linear layer.</p>
+
+<h2 id="classification">Classification</h2>
+
+<ol>
+  <li>Feed global Feature $F_o$ to the classification decoder, consisting two cascaded feed-forward neural networks LBRs (Linear, BatchNorm, and ReLU layers), with dropout rate 0.5.</li>
+  <li>A linear layer to predict the final classification scores $C \in R^{N_c}$ , determined as maximal score.</li>
+</ol>
+
+<h2 id="segmentation">Segmentation</h2>
+
+<ol>
+  <li>Concatenate global feature $F_g$ with point-wise features in $F_o$.</li>
+  <li>Encode the one-hot object category vector as 64-dim feature and concatenate it with the global feature.</li>
+  <li>dropout only performed on the first LBR.</li>
+</ol>
+
+<h2 id="normal-estimation">Normal Estimation</h2>
+
+<ul>
+  <li>Same architecture as in segmentation by setting $N=3$, without object category encoding.</li>
+  <li>Regard the output point-wise score as the predict normal.</li>
+</ul>
+
+<h2 id="naive-pct">Naive PCT</h2>
+
+<h2 id="offset-attention">Offset Attention</h2>
+
+<p>Replace the Self-Attention module with Offset-Attention Module.</p>
+
+<ul>
+  <li>The OA layer calculates the offset (difference) between the self-attention features and the input features by element-wise subtraction.</li>
+</ul>
+
+<p><img src="./image-20220607163325009.png" alt="image-20220607163325009" /></p>
+
+<h2 id="neighbour-embedding">Neighbour Embedding</h2>
+
+<p><img src="./image-20220608163124972.png" alt="image-20220608163124972" /></p>
+
+<p>The Neighbour Embedding module contains two LBR layers and two SG (Sampling and grouping) layers.</p>
+
+<p><strong>The SG Layer</strong></p>
+
+<ul>
+  <li>Input point cloud $P$ with $N$ points and corresponding features $F$ , output a sampled point cloud $P_s$ with $N_s$ points and aggregated features $F_s$.</li>
+</ul>
+
+<ol>
+  <li>Adopt Farthest point sampling (FPS) algorithm to downsample $P \rarr P_s$</li>
+  <li>for each sampled point $p \in P_s$, $knn(p, P)$ is its $k$-nearest neighbours in $P$. The output feature is:</li>
+</ol>
+
+<p><img src="./image-20220608163708932.png" alt="image-20220608163708932" /></p>
+
+<p>$F(p)$ the input feature of point $p$,</p>
+
+<p>$F_s(p)$ is the output feature of sampled point $p$,</p>
+
+<p>$MP$ is the max-pooling operator,</p>
+
+<p>$RP(x, k)$ repeat vecotr $x$ in $k$ times to form a matrix. (idea from <em>EdgeConv</em>)</p>
+
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/06/06/Attention-is-all-you-need.html" data-toggle="tooltip" data-placement="top" title="Transformer 论文 Attention is all you need Reading 阅读笔记">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/06/22/point-cloud-visualization-utils.html" data-toggle="tooltip" data-placement="top" title="Point Cloud Visualization Utils">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

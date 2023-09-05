@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Batch Normalization - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="Why">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/08/01/batch-normalization.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Batch Normalization</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on August 01, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   9 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="why">Why</h1>
+
+<p>Model is updated layer-by-layer backward from the output to the input using estimate of error</p>
+
+<p>Because all layers are changed during an update, the update procedure is forever chasing a moving target</p>
+
+<!-- more -->
+
+<p>E.g. the weights of a layer are updated expecting the prior layer outputs values with given distribution, but this distribution will change after the weights of the prior layers are updated</p>
+
+<h2 id="internal-covariate-shift">Internal Covariate Shift</h2>
+
+<p>The the gradient descent proceed, the parameters in each layer would update, making the output distribution change, therefore the tar for the next layer changes, the next layers has to learn the distribution that keeps changing.</p>
+
+<h3 id="influence">Influence</h3>
+
+<ul>
+  <li>deep layers have to keep adjusting to learning the input distribution, lower the convergence speed.</li>
+  <li>the training tend to go to the saturated space of the activation
+    <ul>
+      <li>Solution
+        <ol>
+          <li>Using non saturated activation function</li>
+          <li>make the input distribution of the activation in a stable situation, to help it away from the saturated place.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="what">What</h1>
+
+<p>Batch Normalization is proposed as a technique to help coordinate the update of multiple layers in the model</p>
+
+<p>Scaling the output of the layer, by standardizing the activations of each input variable per mini-batch, such as the activations of a node from the previous layer. (Standardization refers to rescaling data to have a mean of zero and standard deviation of one)</p>
+
+<p>Standardizing the activations of the prior layer means that assumptions the subsequent layer makes about the spread and distribution of inputs during the weight update will not change dramatically.</p>
+
+<p>This has the effect of stabilizing and speeding-up the training process of deep neural networks.</p>
+
+<p>Normalizing the inputs to the layers has an effect on the training of the model, dramatcally reducing the number of epochs required. It can also have a regularizing effect. Reducing generalization error much like the use of activation regularization.</p>
+
+<h2 id="equations">Equations</h2>
+
+\[\hat x = \frac{x - mean}{\sqrt{var + eps}}\]
+
+<p>use two extra parameter $\gamma$  and $\beta$ to make recover the expression ability for the data:
+\(\hat Z_j = \gamma_j Z_j + \beta_j\)
+During testing, we use the average mean and variance from the training procedure:
+\(\mu_{test} = E(\mu_{batch})\)</p>
+
+<h2 id="whitening">Whitening</h2>
+
+<p>PCA whitening and ZCA whitening for each layer in every epoch</p>
+
+<h3 id="aim">Aim:</h3>
+
+<ul>
+  <li>make the input features have the same mean and standard deviation</li>
+  <li>remove relevance between features</li>
+</ul>
+
+<h2 id="batch-normalization">Batch Normalization</h2>
+
+<h3 id="why-not-using-whitening">why not using whitening?</h3>
+
+<ul>
+  <li>Expensive computation cost</li>
+  <li>Whitening process change the distribution of each layer, therefore change the expressiveness of data in each layer. The parameters learned in lower layers would get lost by whitening.</li>
+</ul>
+
+<h3 id="idea">Idea</h3>
+
+<p>simplify the computation, normalization for every features, and let every feature has mean 0 and deviation</p>
+
+<p>add the linear transform to make those data revive their expressiveness as much as possible</p>
+
+<h1 id="batch-renormalization">Batch Renormalization</h1>
+
+<p>For small mini-batches that do not contain a representative distribution of examples from the training dataset, the difference in the standarized inputs between training and inference can result in noticeable difference in performance.</p>
+
+<p>Batch Renormalization makes the estimate of the variable mean and standard deviation more stable across mini-batches.</p>
+
+<h1 id="practice">Practice</h1>
+
+<p>In practice, it is common to allow the layer to learn a new mean and standard deviation, beta and gamma, that wallow the automatic scaling and shifting of the standarized layer inputs.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+
+
+<span class="sh">'''</span><span class="s">
+X.shape = [b, c, h, w] for 2d
+X.shape = [b, d] for 1d
+</span><span class="sh">'''</span>
+<span class="k">def</span> <span class="nf">batch_norm</span><span class="p">(</span><span class="n">is_training</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">moving_mean</span><span class="p">,</span> <span class="n">moving_var</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">is_training</span><span class="p">:</span>
+      	<span class="n">X_h</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">moving_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">moving_var</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      	<span class="n">feature_shape</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">feature_shae</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">feature_shape</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+         <span class="c1"># for norm1d
+</span>        		<span class="n">mean</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+          	<span class="n">var</span> <span class="o">=</span> <span class="p">((</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+          	<span class="n">mean</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">keepdim</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="p">((</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">keepdim</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">X_h</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+        
+        <span class="c1"># momentum smoothing
+</span>        <span class="n">moving_mean</span> <span class="o">=</span> <span class="n">momentum</span> <span class="o">*</span> <span class="n">moving_mean</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">momentum</span><span class="p">)</span> <span class="o">*</span> <span class="n">mean</span>
+        <span class="n">moving_var</span> <span class="o">=</span> <span class="n">momentum</span> <span class="o">*</span> <span class="n">moving_var</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">momentum</span><span class="p">)</span> <span class="o">*</span> <span class="n">var</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">X_h</span> <span class="o">+</span> <span class="n">beta</span>
+  	<span class="k">return</span> <span class="n">Y</span><span class="p">,</span> <span class="n">moving_mean</span><span class="p">,</span> <span class="n">moving_var</span>
+
+<span class="k">class</span> <span class="nc">_BatchNorm</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+  	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">num_dims</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+    		<span class="nf">super</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">num_dims</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+          	<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_dims</span><span class="p">)</span>
+       	<span class="k">else</span><span class="p">:</span>
+          	<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+      	<span class="n">Y</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span> <span class="o">=</span> <span class="nf">batch_norm</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">is_training</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">gamma</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">momentum</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">momentum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y</span>
+<span class="k">class</span> <span class="nc">BatchNorm1d</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">BatchNorm2d</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">):</span>
+  	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">nums_features</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<h1 id="comparison">Comparison</h1>
+
+<h2 id="with-layer-normalization">With layer normalization</h2>
+
+<ul>
+  <li>
+    <p>BN work for a batch of training examples, where LN work for single sample.</p>
+  </li>
+  <li>BN standardize across features for samples, where LN standardize for all features in the single sample</li>
+  <li>LN better used in NLP</li>
+</ul>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/07/11/TSNE-notes.html" data-toggle="tooltip" data-placement="top" title="Use T-SNE for a better visualization">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/08/01/Activations.html" data-toggle="tooltip" data-placement="top" title="Commonly used Activation functions">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

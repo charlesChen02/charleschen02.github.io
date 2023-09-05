@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    ShapePredictor 原理分析 - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="前言">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2023/09/01/shapePredictor.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>ShapePredictor 原理分析</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on September 01, 2023 &middot; <span class="reading-time" title="Estimated read time">
+  
+   1 min  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="前言">前言</h1>
+
+<p>Dlib 库中的 shape predictor 是基于论文： One Millisecond Face Alignment with an Ensemble of Regression Trees 中提出的 ERT(Ensemble of Regression Trees) 级联回归树进行实现的, 通过进行特征选择并最小化损失函数.</p>
+
+<p><img src="intro.png" alt="" /></p>
+
+<!-- more -->
+
+<h1 id="级联回归器">级联回归器</h1>
+
+<p>记$x_i \in R^2$ 为图片$I$中的第 $i$ 个面部特征点,包括了该点的 $(x,y)$ 坐标, 同时使用向量 $S = (x_1^T, …, x_p^T)^T \in R^{2p}$ 作为图片 $I$ 中的所有 $p$ 个面部特征点, $\hat{S}^{(t)}$ 为当前对于 Ground Truth $S$ 的预测. 级联中的每一个回归器 $r_t( . , . )$ 预测基于当前的预测 $\hat{S}^{(t)}$ 的更新向量, 并添加到当前的形状预测器中来提高预测结果:</p>
+
+\[\hat{S}^{(t+1)} = \hat{S}^{(t)} + r_t(I, \hat{S}^{(t)})\]
+
+<p>因为$r_t$的预测是同时基于例如像素密集度这种从图像 $I$ 中计算的特征, 并且根据当前的图像预测器 $\hat{S}^{(t)}$ 作为索引. 这样为整个过程提供了几何不变性.</p>
+
+<p>在训练过程中, 每一个回归器 $r_t$ 使用梯度树提升(gradient tree boosting)与误差损失平方和(sum of square error loss).</p>
+
+<h1 id="训练级联回归器">训练级联回归器</h1>
+
+<h2 id="训练第一个回归器">训练第一个回归器</h2>
+
+<p>使用一个三元组来初始化最初的回归函数$r_0$, 其中包括一个面部图片, 一个初始形状预测和一个目标更新步长 $(I_{\pi_i}, \hat{S}_i^{(0)}, \Delta S_i^{(0)})$.</p>
+
+<p>其中:</p>
+
+\[\pi_i \in \{1, ..., n\} \\\]
+
+\[\hat{S}_i^{(0)} \in \lbrace S_1, ..., S_n \rbrace \not  S_{\pi_i}\\\]
+
+\[\Delta S_i^{(0)} = S_{\pi_i} - \hat{S}_i^{(0)}\]
+
+<p>三元组的总数为 $N = nR$, $R$ 为用于每一张照片的初始化数量. 每一个初始化的形状预测器从${ S_1, …, S_n}$ 中均匀采样.</p>
+
+<h2 id="单回归器内的梯度提升树训练">单回归器内的梯度提升树训练</h2>
+
+<p>输入: 三元组</p>
+
+\[\{(I_{\pi_i}, \hat{S}_i^{(t)}, \Delta S_i^{(t)})\}_{i=1}^N\]
+
+<p>和收缩因数$0 &lt; \gamma &lt; 1$</p>
+
+<p>初始化:</p>
+
+\[f_0(I, \hat{S}^{(t)}) = {argmin}_{\gamma \in R^{2p}} \sum_{i=1}^N || \Delta S_i^{(t)} - \gamma||^2\]
+
+<p>对于回归器中的梯度提升树 k = 1, …, K:</p>
+<ol>
+  <li>令 $i = 1, .., N$</li>
+</ol>
+
+\[r_{ik} =  \Delta S_i^{(t)} - f_{k-1}(I_{\pi_i}, \hat{S}_i^{(t)})\]
+
+<ol>
+  <li>使用一个回归树$g_k(I, \hat{S}<em>i^{(t)})$ 对目标 $r</em>{ik}$ 进行拟合</li>
+  <li>更新$f$</li>
+</ol>
+
+\[f_k(I, \hat{S}^{(t)}) = f_{k-1}(I, \hat{S}^{(t)}) + \gamma g_k(I, \hat{S}^{(t)})\]
+
+<p>输出 $r_t(I, \hat{S}^{(t)}) = f_K(I, \hat{S}^{(t)})$</p>
+
+<h2 id="回归器级联训练">回归器级联训练</h2>
+
+<p>通过上面的算法我们可以得到回归预测器$r_0$, 同时用于训练的初始三元组通过设定:</p>
+
+\[\hat{S}_i^{(t+1)} = \hat{S}_i^{(t)} + r_t(I, \hat{S}^{(t)}) \\
+\Delta S_i^{(t+1)} = S_{\pi_i} - S_i^{(t+1)}\]
+
+<p>被更新为了$(I_{\pi_i}, \hat{S}_i^{(1)}, \Delta S_i^{(1)})$, 对于下一个回归器 $r_1$,</p>
+
+<h2 id="回归树训练细节">回归树训练细节</h2>
+
+<p>在回归器的训练过程中, 关键点在于每个回归器内的梯度提升树对残差目标的拟合效果. 在文中共提出了三个方面:</p>
+
+<ul>
+  <li>形状无关的划分测试</li>
+  <li>选择节点划分</li>
+  <li>特征选择</li>
+</ul>
+
+<p>具体细节可以看原论文.</p>
+
+<p><img src="image.png" alt="" /></p>
+
+<h1 id="结语">结语</h1>
+
+<p>该算法给dlib库中的shape predictor提供了理论基础, 并且在dlib中最终选择使用68个landmark来让上文的级联回归树进行拟合, 在原文中也测试了400, 200, 80, 40, 20 等不同数量的初始形状数量.</p>
+
+<p><img src="conclu.png" alt="" /></p>
+
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2023/07/07/face-recognition-notes.html" data-toggle="tooltip" data-placement="top" title="人脸识别项目实战笔记">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2023/09/05/use-jekyll-to-build-blog.html" data-toggle="tooltip" data-placement="top" title="Mac系统使用jekyll创建一个博客">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

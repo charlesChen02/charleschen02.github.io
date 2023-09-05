@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    经常遇到的 venv cuda broke 问题分析与解决 - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="问题">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/05/31/Notes-for-venv-cuda-broke.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>经常遇到的 venv cuda broke 问题分析与解决</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on May 31, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   1 min  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="问题">问题</h1>
+
+<p>使用autodl的时候, 用<code class="language-plaintext highlighter-rouge">pip install -r requirements.txt</code>下载代码要求的包之后, 发现训练直接开始报错.</p>
+
+<!-- more -->
+
+<p>一些环境的参数:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>显卡型号: RTX A5000 显存:24GB
+
+镜像版本:
+PyTorch  1.10.0
+Python  3.8
+Cuda  11.3
+
+CPU:
+15核 AMD EPYC 7543 32-Core Processor
+内存:30GB
+</code></pre></div></div>
+
+<p>报错的内容为:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NVIDIA GeForce RTX A5000 with CUDA capability sm_86 is not compatible with the current PyTorch installation. The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA GeForce RTX A5000 GPU with PyTorch.
+
+</code></pre></div></div>
+
+<h1 id="解决方法">解决方法</h1>
+
+<p><strong>简单版: 卸载当前环境中torch, torchvision, torchaudio, 使用<a href="https://pytorch.org/get-started/locally/">pytorch官方</a>指定的下载方式执行对应可执行cuda版本的pytorch</strong></p>
+
+<p>eg. (具体需要通过上面的连接来确定具体下载的命令)</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip uninstall torch torchvision torchaudio
+pip <span class="nb">install </span>torch torchvision torchaudio <span class="nt">--extra-index-url</span> https://download.pytorch.org/whl/cu113
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="问题分析">问题分析</h2>
+
+<p>乍一看像是pytorch版本出了问题, 因为当时通过<code class="language-plaintext highlighter-rouge">nvidia-smi</code>以及<code class="language-plaintext highlighter-rouge">nvcc --version</code>都看到了cuda版本为11.3, 而11.3版本目前是支持sm_86架构的.</p>
+
+<p>后来看了<a href="https://discuss.pytorch.org/t/need-help-trouble-with-cuda-capability-sm-86/120235/6">这个</a>, 检查了一下虚拟环境中pytorch连接的对应的cuda版本:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="n">torch</span><span class="p">.</span><span class="n">version</span><span class="p">.</span><span class="n">cuda</span>
+</code></pre></div></div>
+
+<p>&gt; 10.2</p>
+
+<p>这下问题明确了, 即虚拟环境中pytorch自动连接的cuda版本出了问题, 不能支持设备上的显卡, 而上述两个命令查询的都是实体环境的状态.</p>
+
+<p>如果要解决, 需要先卸载当前虚拟环境中的torch相关组件: torch, torchvision, torchaudio</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(s) root@container-8fb311963c-c800a7a5:/home# pip uninstall torch torchvision torchaudio
+</code></pre></div></div>
+
+<p>然后再使用<a href="https://pytorch.org/get-started/locally/">官网</a>提供的下载方式, 指定cuda版本, 重新下载:</p>
+
+<p><img src="./image-20220531095130395.png" alt="image-20220531095130395" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+</code></pre></div></div>
+
+<p>安装完成后再次检查cuda版本号:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import torch
+torch.version.cuda
+</code></pre></div></div>
+
+<p>&gt; 11.3</p>
+
+<p>问题解决, 可以开始训练了.</p>
+
+<p><img src="./image-20220531095342135.png" alt="image-20220531095342135" /></p>
+
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/05/31/system-design-study-notes.html" data-toggle="tooltip" data-placement="top" title="System Design Study Notes">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/06/03/Training-Memo.html" data-toggle="tooltip" data-placement="top" title="Training Memo June">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

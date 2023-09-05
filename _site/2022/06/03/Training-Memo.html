@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Training Memo June - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="Abstract: 自己记录一下每天Master项目的Log">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/06/03/Training-Memo.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Training Memo June</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on June 03, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   2 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <blockquote>
+  <p>Abstract: 自己记录一下每天Master项目的Log</p>
+</blockquote>
+
+<!-- more -->
+
+<h1 id="2022">2022</h1>
+
+<h2 id="jun">Jun</h2>
+
+<h3 id="upto-02">Upto 02</h3>
+
+<h4 id="progress">Progress</h4>
+
+<ul>
+  <li>Compute the proportion synthetic points, resemble real dataset metadata.</li>
+  <li>create mapping function for the synthetic -&gt; real data</li>
+  <li>train squeezeSegV2 with synthetic data for 25 epochs
+    <ul>
+      <li><a href="./events.out.tfevents.1654059287.container-8fb311963c-c800a7a5.173827.0">Tensorboard</a></li>
+    </ul>
+  </li>
+  <li>fine-tune Syn_Epoch25 with semanticKitti for 50Epoch
+    <ul>
+      <li><a href="./events.out.tfevents.1654123702.container-8fb311963c-c800a7a5.461.0">Tensorboard</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="memo">Memo</h4>
+
+<ul>
+  <li>
+    <p>Train the model with transfer tech. does not work (Orange: real data tuning, Blue: synthetic data pretrain)</p>
+
+    <p><img src="./image-20220603093525953.png" alt="image-20220603093525953" /></p>
+
+    <p><img src="./image-20220603093619567.png" alt="image-20220603093619567" /></p>
+
+    <p><img src="./image-20220603093642596.png" alt="image-20220603093642596" /></p>
+
+    <p><img src="./image-20220603093813974.png" alt="image-20220603093813974" /></p>
+
+    <p>By looking at the board, we can see that the model is not learning properly, as if it is well pretrained, the starting point for the tuning (orange) line should be closer to the blue one, as we assume two domains should share some features in higher dimension, like this:</p>
+
+    <p><img src="./image-20220603094346113.png" alt="image-20220603094346113" /></p>
+
+    <p>We are expecting the model to at least learn the intersection part of the knowledge from the synLiDAR, but in practice this is not the case, as shown by training progress.</p>
+  </li>
+  <li>
+    <p>The width of the canvas set in the SqueezeSegv2 is 2048, which may be a bit too big for SynLiDAR. -&gt; Going to change the size to 1024 and train again</p>
+  </li>
+  <li>
+    <p>Going to use the pre-trained synLiDAR model to infer on the SemanticKitti directly, and test the performance:</p>
+
+    <ul>
+      <li>
+        <p>A more detailed setting:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>train</th>
+              <th>FineTune?</th>
+              <th>Infer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Synthetic</td>
+              <td>Synthetic</td>
+              <td>Real</td>
+            </tr>
+            <tr>
+              <td>Synthetic</td>
+              <td>Real</td>
+              <td>Real</td>
+            </tr>
+            <tr>
+              <td>Real</td>
+              <td>Real</td>
+              <td>Real</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <p>Going to evaluate above settings step by step.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="06">06</h3>
+
+<h4 id="progress-1">Progress</h4>
+
+<ul>
+  <li>Train the RangeNet++ backboned with SqueezeSegv2 for Semantic Segmentation
+    <ul>
+      <li>real dataset</li>
+      <li>synthetic dataset</li>
+      <li>-&gt; as step to row 1 and 3 for the transfer learning part</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Schedule:</p>
+
+<ul>
+  <li>Inference syn on real directly</li>
+  <li>Inference real on real directly</li>
+  <li>Inference real on syn directly</li>
+  <li>Inference syn on syn directly</li>
+</ul>
+
+<h3 id="18">18</h3>
+
+<p>The biggest problem for choosing a good baseline model is that you do not know which trick they actually played to achieve a better scoring for the accuracy, and it is often the case that such technique is not applicable for other dataset, that is, they cannot be transplanted to other tasks at all..</p>
+
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/05/31/Notes-for-venv-cuda-broke.html" data-toggle="tooltip" data-placement="top" title="经常遇到的 venv cuda broke 问题分析与解决">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/06/06/Attention-is-all-you-need.html" data-toggle="tooltip" data-placement="top" title="Transformer 论文 Attention is all you need Reading 阅读笔记">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    RangeNet++ and SqueezeSegv3 网络架构阅读分析 - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="Update: 因为发现了squeezeSegv3其实是基于rangeNet++的一个整体框架上的一个小优化, 而且v3的资源消耗远远大于RangeNet++, 在单台服务器上的部署几乎不可行, 所以后来主要在研究使用rangeNet++搭配不同的backbone.">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/05/30/SqueezeSeg-Source-Code-Read.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>RangeNet++ and SqueezeSegv3 网络架构阅读分析</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on May 30, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   8 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <blockquote>
+  <p>Update: 因为发现了squeezeSegv3其实是基于rangeNet++的一个整体框架上的一个小优化, 而且v3的资源消耗远远大于RangeNet++, 在单台服务器上的部署几乎不可行, 所以后来主要在研究使用rangeNet++搭配不同的backbone.</p>
+</blockquote>
+
+<h1 id="introduction">Introduction</h1>
+
+<p><code class="language-plaintext highlighter-rouge">SqueezeSegv3</code> 是点云point cloud 语意分割 Semantic Segmentation的State-of-art的模型之一, 特点为使用的基于投影 (projection-based)方法将点云转换成图片, 再使用成熟的2D模型进行分割, 最后通过KNN手段进行back interporlation, 获取分割后的点云标签.</p>
+
+<!-- more -->
+
+<p><img src="./image-20220530100739416.png" alt="image-20220530100739416" /></p>
+
+<blockquote>
+  <p>高贵的8路泰坦.jpg</p>
+</blockquote>
+
+<h2 id="网络架构-architecture">网络架构 Architecture</h2>
+
+<p><img src="./image-20220530093757103.png" alt="image-20220530093757103" /></p>
+
+<h2 id="critical-point">Critical Point</h2>
+
+<h3 id="spherical-projection">Spherical Projection</h3>
+
+<p>使用公式对点云进行2D投射,</p>
+
+<p><img src="./image-20220530094237288.png" alt="image-20220530094237288" /></p>
+
+<p>其中 $(x, y, z)$ 为原点云坐标, $w, h$为自定的画布宽度与长度, 一般可以在Dataset对应的paper中找到对应的传感器参数, $f = f_{up} + f_{down}$ 为纵向 $FOV$, $f_{up}, f_{down}$ 为对应的水平向上与水平向下视角, 都是用dataset内部本身定义的, $r = \sqrt{x^2 + y^2 + z^2}$ 表示每一个点的范围(range).</p>
+
+<p>经过投射之后, 点云分割就可以变为图片分割. $(p, q)$对应了转换后图像(称为LiDAR Image) 的坐标</p>
+
+<h3 id="spatially-adaptive-convolution-sac">Spatially-Adaptive Convolution (SAC)</h3>
+
+<blockquote>
+  <p>导致模型成为显存杀手的直接原因: kernel function过于复杂导致pytorch.tensor经历的过多的unfolding, 狂吃资源…</p>
+</blockquote>
+
+<p>因为Lidar Image与正常的图像本身所包含的信息不太相同, 比如Lidar image中各个像素对应的位置信息很重要, 而对于一般的2D 图片来说没有那么重要, 所以paper中提出了SAC内核kernel来替代一般的standar convolution.</p>
+
+<p>Kernel Function:</p>
+
+<p><img src="./image-20220530105209437.png" alt="image-20220530105209437" /></p>
+
+<p>paper中尝试做了一点点优化: 将kernel的计算优化为了<code class="language-plaintext highlighter-rouge">standard conv * attention map</code> (但是优化真的只有一点)</p>
+
+<p><img src="./image-20220530105442555.png" alt="image-20220530105442555" /></p>
+
+<blockquote>
+  <p>To reduce the complexity, we collapse several dimensions of A to obtain a smaller attention map to make it computationally tractable.</p>
+</blockquote>
+
+<p>作者通过压缩attention map的维度来使计算变得可行.</p>
+
+<h3 id="squeezesegv3">SqueezeSegV3</h3>
+
+<p>paper中共提出了两种架构: <code class="language-plaintext highlighter-rouge">SqueezeSegV3-21 (SSGV3-21)</code> 与 <code class="language-plaintext highlighter-rouge">SqueezeSegV3-53 (SSGV3-53)</code>, 基本就是基于rangenet21和rangenet53做出来的.</p>
+
+<p>基本可以认为是rangenet的kernel优化版本</p>
+
+<p>rangeNet++ backbone: https://github.com/PRBonn/lidar-bonnetal</p>
+
+<h1 id="project-structure">Project Structure</h1>
+
+<p>project address: https://github.com/chenfengxu714/SqueezeSegV3</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="o">|</span> <span class="n">figure</span> <span class="c1">#一些展示用图片
+</span> <span class="o">|</span> <span class="n">semaple_data</span> <span class="c1">#一些用来inference的样本数据
+</span> <span class="o">|</span> <span class="n">src</span>
+ 	<span class="o">|</span> <span class="n">auxiliary</span>
+ 	<span class="o">|</span> <span class="n">backbones</span> 
+ 			<span class="o">|-</span><span class="n">SAC</span><span class="p">.</span><span class="n">py</span> <span class="c1">#包含了SAC模块的源代码
+</span> 	<span class="o">|</span> <span class="n">common</span>
+ 		<span class="o">|</span> <span class="n">sync_batchnorm</span> <span class="c1"># 做分布式训练的batch norm sync模块
+</span> 			<span class="o">|-</span> <span class="n">batchnorm</span><span class="p">.</span><span class="n">py</span>
+ 			<span class="o">|-</span> <span class="n">comm</span><span class="p">.</span><span class="n">py</span>
+ 			<span class="o">|-</span> <span class="n">replicate</span><span class="p">.</span><span class="n">py</span>
+ 		<span class="o">|-</span> <span class="n">avgmeter</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 做average的class
+</span> 		<span class="o">|-</span> <span class="n">laserscan</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 将point clouds 转化为sphere projection的关键代码
+</span> 		<span class="o">|-</span> <span class="n">laserscanvis</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 使用wisdom对整个dataset进行可视化转换
+</span> 		<span class="o">|-</span> <span class="n">logger</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 记日志的
+</span> 		<span class="o">|-</span> <span class="n">onehot</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 进行one hot转化的
+</span> 		<span class="o">|-</span> <span class="n">warmupLR</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 初始化cyclic-lr
+</span> 	<span class="o">|</span> <span class="n">tasks</span>
+ 		<span class="o">|</span> <span class="n">semantic</span>
+ 			<span class="o">|</span> <span class="n">config</span>
+ 				<span class="o">|</span> <span class="n">arch</span> <span class="c1"># 模型架构配置文件
+</span> 				<span class="o">|</span> <span class="n">labels</span> <span class="c1"># dataset配置文件
+</span> 			<span class="o">|</span> <span class="n">dataset</span> <span class="c1"># 包含对应数据集的parser, 目前只有kitti
+</span> 			<span class="o">|</span> <span class="n">decoders</span> 
+ 				<span class="o">|-</span> <span class="n">SAC</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 包含了由SAC构成的decoder模块
+</span> 			<span class="o">|</span> <span class="n">modules</span>
+ 				<span class="o">|-</span> <span class="n">demo_user</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 展示用的thread class
+</span> 				<span class="o">|-</span> <span class="n">ioueval</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 计算各种IoU用的
+</span> 				<span class="o">|-</span> <span class="n">segmentator</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 整体网络构建
+</span> 				<span class="o">|-</span> <span class="n">trainer</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 模型训练流程定义
+</span> 				<span class="o">|-</span> <span class="n">user</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 各个线程初始化训练用的class
+</span> 			<span class="o">|</span> <span class="n">postproc</span>
+ 			<span class="o">|-</span> <span class="n">demo</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 演示文件
+</span> 			<span class="o">|-</span> <span class="n">evaluate_biou</span><span class="p">.</span><span class="n">py</span> <span class="c1"># evalaute border iou
+</span> 			<span class="o">|-</span> <span class="n">evaluate_iou</span><span class="p">.</span><span class="n">py</span> <span class="c1"># evaluate iou
+</span> 			<span class="o">|-</span> <span class="n">infer</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 对数据集进行infer
+</span> 			<span class="o">|-</span> <span class="n">train</span><span class="p">.</span><span class="n">py</span> <span class="c1"># 对数据集进行训练
+</span> 			<span class="o">|-</span> <span class="n">visulaize</span><span class="p">.</span><span class="n">py</span>
+ 	
+ 
+</code></pre></div></div>
+
+<h1 id="model-component">Model Component</h1>
+
+<p>在RangeNet++ 中, 我们可以选择不同的backbone来进行训练, 其中不乏有SoTA表现的RandLANet以及SqueezeSegv3, 可以知道的是, RangeNet++这一个框架是点云 projection based 方法里面十分有效且成熟的方案.</p>
+
+<blockquote>
+  <p>天国的Panoptic Segmentation适配 ; - ;</p>
+</blockquote>
+
+<p><img src="./image-20220531212458692.png" alt="image-20220531212458692" /></p>
+
+<h1 id="model-modification">Model Modification</h1>
+
+<p>为了使rangeNet++能够在我们自定义的训练集上进行训练, 我们可以重新创建的一个新的class parser, 并且重写Dataset类, 或者将自定的Dataset metadata修改为与SemanticKitti的metadata类似. 当前我采用了第二种方法 (主要是比较简单).</p>
+
+<p>Specifically:</p>
+
+<ul>
+  <li>compute the proportion for each class in the dataset</li>
+  <li>map the label classes with semantickitti, into 20 classes</li>
+  <li>add learning_map and learning_map_inv</li>
+</ul>
+
+<p>由于自定义的class数量与semantickitti不匹配, 为了确保transfer learning能有robust的validation, 我们需要在validation阶段使模型读入semanticKitti的data, 并且对predicted class进行mapping.</p>
+
+<p>因为Task为Semantic Segmentation, prediction 为对于每一个点的onehot class prediction, 所以在求得了argmax之后, 我们直接对predicted outcome进行synthetic-to-real 的mapping 转换, 通过作者提供的SynLiDAR 对 SemanticKitti的转换, 完成之后再计算loss, 这样就完成了Synthetic-&gt; Real 的transfer Learning.</p>
+
+<p>完成fine-tuning之后, 使用该模型对real data进行inference, 同样的, 需要在获得prediction result之后做mapping.</p>
+
+<h1 id="tensorboard-with-pytorch">Tensorboard with Pytorch</h1>
+
+<p>Tensorboard 可以很好的帮助我们可视化训练的过程, 并且直观的判断当前模型的训练状态. 在这里对tensorboard在pytorch上的部署方式做一个简单的记录, 方便自己未来查询:</p>
+
+<h2 id="需要安装好pytorch">需要安装好pytorch</h2>
+
+<h2 id="实例化writer">实例化writer:</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">torch.utils.tensorboard</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="nc">SummaryWriter</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>如果不对SummarWriter进行有参初始化, 数据将会默认存储在./run目录下</p>
+
+<p>这里顺便贴一下SummarWriter()的初始化参数, <a href="https://pytorch.org/docs/stable/tensorboard.html">原链接</a>:</p>
+
+<p><img src="./image-20220531214101112.png" alt="image-20220531214101112" /></p>
+
+<p><img src="./image-20220531214113269.png" alt="image-20220531214113269" /></p>
+
+<h2 id="一个简单的经典的使用例子">一个简单的经典的使用例子:</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">torch.utils.tensorboard</span> <span class="kn">import</span> <span class="n">SummaryWriter</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="nc">SummaryWriter</span><span class="p">()</span> <span class="c1"># 实例化TensorBoard writer
+</span><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># 模型
+</span><span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="nc">MSELoss</span><span class="p">()</span> <span class="c1"># loss
+</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">SGD</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="c1"># optimizer
+</span>
+<span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="nb">iter</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nb">iter</span><span class="p">):</span> <span class="c1"># 共进行iter个epoch
+</span>        <span class="n">y1</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="nf">criterion</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">writer</span><span class="p">.</span><span class="nf">add_scalar</span><span class="p">(</span><span class="sh">"</span><span class="s">Loss/train</span><span class="sh">"</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span> <span class="c1"># 将当前y=loss, x=epoch记录进入tb中, 表头名字为Loss/train
+</span>        <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+
+<span class="nf">train_model</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">writer</span><span class="p">.</span><span class="nf">flush</span><span class="p">()</span> <span class="c1"># 确保writerbuffer中所有内容全部写入文件中
+</span><span class="n">writer</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span> <span class="c1"># 当不再使用时, 关闭writer
+</span></code></pre></div></div>
+
+<p>一些其他的writer function, 以应对不同场景, <a href="https://pytorch.org/docs/stable/tensorboard.html">原文</a>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">add_scalars</span><span class="p">(</span><span class="n">main_tag</span><span class="p">,</span> <span class="n">tag_scalar_dict</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1">#  添加scalar类型的值, 感觉是最常用,最简单的
+</span>
+<span class="nf">add_histogram</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="sh">'</span><span class="s">tensorflow</span><span class="sh">'</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_bins</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加histgram, 方便看出每次训练的数据分布等
+</span>
+<span class="nf">add_image</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">img_tensor</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dataformats</span><span class="o">=</span><span class="sh">'</span><span class="s">CHW</span><span class="sh">'</span><span class="p">)</span> <span class="c1"># 添加image, 需要pillow package
+</span>
+<span class="nf">add_figure</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">figure</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加matplotlib进入summary, 需要matplotlib package
+</span>
+<span class="nf">add_video</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">vid_tensor</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加video, 需要moviepy package
+</span>
+<span class="nf">add_audio</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">snd_tensor</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加audio
+</span>
+<span class="nf">add_text</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">text_string</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加text
+</span>
+<span class="nf">add_graph</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_to_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">use_strict_trace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># 添加graph
+</span>
+<span class="nf">add_embedding</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label_img</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="sh">'</span><span class="s">default</span><span class="sh">'</span><span class="p">,</span> <span class="n">metadata_header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="nf">add_pr_curve</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_thresholds</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加precision recall curve, lets you understand your model’s performance under different threshold settings
+</span>
+<span class="nf">add_custom_scalars</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span> <span class="c1"># 自定义添加
+</span>
+<span class="nf">add_mesh</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">config_dict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="c1"># 添加mesh或3D point clouds
+</span>
+<span class="nf">add_hparams</span><span class="p">(</span><span class="n">hparam_dict</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">hparam_domain_discrete</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">run_name</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="当tensorboard-部署完成后-运行tensorboard">当Tensorboard 部署完成后, 运行tensorboard</h2>
+
+<p>首先需要下载:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pip install tensorboard
+</code></pre></div></div>
+
+<p>然后启动tensorboard进程:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tensorboard</span> <span class="o">--</span><span class="n">logdir</span><span class="o">=</span><span class="n">runs</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">logdir</code>跟上对应SummaryWriter配置的记录路径.</p>
+
+<p>tensorboard启动后默认在6006端口 (如果开始跑了但是没有数据有可能只是模型比较慢lol)</p>
+
+<p><img src="./image-20220531215814190.png" alt="image-20220531215814190" /></p>
+
+<p>至此就可以愉快的可视化训练状态了.</p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/05/26/Redis-Study-Notes.html" data-toggle="tooltip" data-placement="top" title="Redis 基础学习笔记">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/05/31/system-design-study-notes.html" data-toggle="tooltip" data-placement="top" title="System Design Study Notes">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

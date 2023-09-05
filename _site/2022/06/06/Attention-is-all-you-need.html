@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Transformer 论文 Attention is all you need Reading 阅读笔记 - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="Transformer">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/06/06/Attention-is-all-you-need.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Transformer 论文 Attention is all you need Reading 阅读笔记</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on June 06, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   2 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="transformer">Transformer</h1>
+
+<p><img src="./image-20220606101907341.png" alt="image-20220606101907341" /></p>
+
+<p>Transformer 遵循了Encoder-Decoder 架构:</p>
+
+<ul>
+  <li>
+    <p>Encoder将input sequence 的 symbol representation 与 latent variable, continuous representations $z$ 进行mapping.</p>
+  </li>
+  <li>Decoder 每次依靠 $z$  生成一个 output sequence of symbols.</li>
+  <li>模型是auto-regressive的, 每次会使用上次生成的symbol作为额外输入进行下一次的生成. (recurrent)</li>
+</ul>
+
+<!-- more -->
+
+<h2 id="the-architecture">The Architecture</h2>
+
+<h3 id="encoder">Encoder</h3>
+
+<p>Encoder由$N = 6$个相同的layer组成, 每一个layer由两个sub-layers. 第一个sublayer是一个multi-head self-attention 机制, 第二个sublayer是一个简单的全连接向前网络. 每一个sublayer都添加了残差链接(residual Connection), 并在后面添加了Normalisation.</p>
+
+<p>所以, 对于每一层sublayer来说, output为$LayerNorm(x + Sublayer(x))$, 其中 $Sublayer(x)$ 表示了各个sublayer自己的输出.</p>
+
+<p>在paper中, 作者将所有sublayer和embedding layer 的输出维度设置为了 $dim_{model} =512$.</p>
+
+<h3 id="decoder">Decoder</h3>
+
+<p>Decoder 也由$N = 6$层相同的layer构成. 每一个layer除了包含在encoder中的两个sublayer, 还添加了第三层sublayer. 第三层sublayer用来对于encoder stack的output进行multi-head attention.</p>
+
+<p>与encoder类似, 进行了残差链接(residual connection)以及layer normalisation.</p>
+
+<p>对Self-attention sublayer进行了一些修改(output embedding offset by one position), 来确保对于position $i$ 的预测只依赖于已知的, 小于 $i$ 的position.</p>
+
+<h3 id="attention">Attention</h3>
+
+<p>Attention函数可以理解为将query和一系列 Key-Value pairs mapping到output, 其中query , key, value 和 output 都是 vectors.</p>
+
+<p>Output 由对values进行加权求和(weighted sum)得到, 而权重通过compatibility function使用query 和 key 进行计算获得.</p>
+
+<p><img src="./image-20220606105025375.png" alt="image-20220606105025375" /></p>
+
+<h3 id="scaled-dot-product-attention">Scaled Dot-Product Attention</h3>
+
+<p>在paper中的attention模型, Scaled Dot-Product Attention中, input中的Q(Query)和K(Key)有维度$d_k$, V(Value) 有维度 $d_v$.</p>
+
+<ol>
+  <li>MatMul: 计算query和所有keys的dot product</li>
+  <li>Scale: 对计算结果除以 $\sqrt{d_k}$</li>
+  <li>Mask (Opt.), for decoder, 具体在后面解释用法.</li>
+  <li>SoftMax: 使用softmax获得对于 values 的权重weights.</li>
+</ol>
+
+<p>实际使用中, 对于多个queries是进行同时计算的, 组成 matrix $Q$, 此时attention的output为:</p>
+
+<p><img src="./image-20220606105833341.png" alt="image-20220606105833341" /></p>
+
+<h4 id="ps">PS</h4>
+
+<ul>
+  <li>常见的 attention 函数包括 additive attention 和 dot-product attention.</li>
+</ul>
+
+<p>理论上这两个的复杂度相似, 但实际上dot-product attention更快, 因为可以将运算压缩为矩阵乘法, 而这种计算方式是高度优化过的.</p>
+
+<ul>
+  <li>对于$d_k$较小的时候, 两个attention函数表现类似, additive attention在$d_k$的较大时, 因为不需要进行scaling, 表现更好</li>
+</ul>
+
+<p>当$d_k$较大时, dot-product 的量级(magnitude)会变得很大, 使softmax获得的gradient极小, 所以paper中使用了 $\frac{1}{\sqrt{d_k}}$进行scaling.</p>
+
+<p><img src="./image-20220606110646243.png" alt="image-20220606110646243" /></p>
+
+<h3 id="multi-head-attention">Multi-Head Attention</h3>
+
+<p>Paper中</p>
+
+<ol>
+  <li>linearly project queries, keys 和 values $h$次, 使用不同的linear projections到$d_k,d_k, d_v$维度中.</li>
+  <li>在每一个投射中, queries, keys, values同时使用attention function. 并获得$d_v$维output值.</li>
+  <li>这些output被结合(concatenated) 并再一次投影, 得到最终的结果.</li>
+</ol>
+
+<ul>
+  <li>Multi-head attention使模型能够同时从不同位置(position使的不同的表征副空间(representation subspaces)中获取信息.</li>
+</ul>
+
+<p><img src="./image-20220606123103387.png" alt="image-20220606123103387" /></p>
+
+<p><img src="./image-20220606123234428.png" alt="image-20220606123234428" /></p>
+
+<p>$W$代表了投影矩阵</p>
+
+<h3 id="attention-的不同使用位置">Attention 的不同使用位置</h3>
+
+<ul>
+  <li>Encoder-Decoder layers
+    <ul>
+      <li>queries 来自之前的 decode layer</li>
+      <li>memory keys and values 来自前一层 encoder layer output.</li>
+      <li>Allow every position in decoder to attend over all positions in the input sequences.</li>
+    </ul>
+  </li>
+  <li>Encoder self-attention layers
+    <ul>
+      <li>Keys, values and queries 来自前一层 encoder 的output.</li>
+      <li>Each position in the encoder can attend to all positions in the previous layer of the encoder.</li>
+    </ul>
+  </li>
+  <li>Decoder self-attention layers
+    <ul>
+      <li>Similarly, allow each position in the decoder to attend to all positions in the decoder up to and including that position.</li>
+      <li>Need to prevent leftward information flow in the decoder to preserve the auto-regressive property.</li>
+      <li>Implement by masking out all values in the input of the softmax which correspond to illegal connections.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="position-wise-feed-forward-networks">Position-wise Feed-Forward networks</h2>
+
+<p>在sublayers中包含的 Feed-Forward Networks, 对于每一个位置分别进行了全连接向前 propagation.</p>
+
+<p><img src="./image-20220606130836799.png" alt="image-20220606130836799" /></p>
+
+<h2 id="positional-encoding">Positional Encoding</h2>
+
+<p>原因:</p>
+
+<ul>
+  <li>Transformer不包含recurrence 和 convolution, 为了使model使用sequence的顺序, 需要将关于相对位置和绝对位置的信息注入(inject)到sequences中.</li>
+</ul>
+
+<p>Paper中使用了sine 和 cosine进行编码</p>
+
+<p><img src="./image-20220606131651375.png" alt="image-20220606131651375" /></p>
+
+<p>$pos$ 表示位置, $i$ 表示维度. 每一个维度的位置编码对应了一个sin值.</p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/06/03/Training-Memo.html" data-toggle="tooltip" data-placement="top" title="Training Memo June">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/06/09/ViT.html" data-toggle="tooltip" data-placement="top" title="ViT and PCT Notes">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

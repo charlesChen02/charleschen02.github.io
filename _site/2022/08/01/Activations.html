@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Commonly used Activation functions - Charles&#39; Idea Warehourse
+    
+  </title>
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <meta name="description" content="Activation functions">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2022/08/01/Activations.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Commonly used Activation functions</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on August 01, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   1 min  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="activation-functions">Activation functions</h1>
+
+<h2 id="why-we-need">Why we need?</h2>
+
+<ul>
+  <li>add non-linear factor, solve the problem that linear models cannot represent</li>
+  <li>Provide better interpretability to the model</li>
+</ul>
+
+<!-- more -->
+
+<h1 id="common-activations">Common activations</h1>
+
+<h2 id="sigmoid">Sigmoid</h2>
+
+\[sig(z) = \frac{1}{e^{-z} + 1}\]
+
+\[sig'(z) = sig(z)(1 - sig(z))\]
+
+<p><img src="./image-20220801155322452.png" alt="image-20220801155322452" /></p>
+
+<ul>
+  <li>cons
+    <ul>
+      <li>left and right all saturated, gradient vanishing</li>
+      <li>exponential computation</li>
+      <li>not zero-centered, lower convergence speed</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="tanh">tanh</h2>
+
+\[tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}\]
+
+<p><img src="./image-20220801155920512.png" alt="image-20220801155920512" /></p>
+
+<p>range from (-1, 1)</p>
+
+<p>adv:</p>
+
+<ul>
+  <li>compared with sigmoid
+    <ul>
+      <li>faster convergence speed, larger slope near 0</li>
+      <li>output mean 0</li>
+      <li>larger saturated space</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="softmax">Softmax</h2>
+
+\[softmax(z) = \frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}\]
+
+<h2 id="relu">relu</h2>
+
+<p><img src="./image-20220801160538133.png" alt="image-20220801160538133" /></p>
+
+<p>dead relu problem: when $ x &lt; 0 $ , ReLU output 0, when backpropagation, the gradient always 0, parameter will never be updated.</p>
+
+<ul>
+  <li>adv:
+    <ul>
+      <li>easy computation</li>
+      <li>more similar to bio-inspired mechanism compared to tanh, sigmoid</li>
+      <li>does not saturate, solve vanishing gradient</li>
+      <li>fast convergence</li>
+    </ul>
+  </li>
+  <li>cons:
+    <ul>
+      <li>not zero centered</li>
+      <li>dead relu problem</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="leaky-relu">leaky relu</h2>
+
+\[LeakyReLU(x) = max(0.01x, x)\]
+
+<p>adv:</p>
+
+<ul>
+  <li>no dead relu problem</li>
+</ul>
+
+<h2 id="elu">elu</h2>
+
+\[ELU(x) = x, x &gt; 0\\
+ELU(x) = \alpha(e^x - 1), x \leq 0\]
+
+<ul>
+  <li>adv
+    <ul>
+      <li>mean activation close to 0</li>
+      <li>more robust to noise</li>
+    </ul>
+  </li>
+  <li>con
+    <ul>
+      <li>exponential computation</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="maxout">maxout</h2>
+
+<p><img src="maxout1.webp" alt="" /></p>
+
+<p><img src="maxout2.webp" alt="" /></p>
+
+<p>It is a learnable activation function</p>
+<ul>
+  <li>Activation function in <strong>maxout</strong> network can be any piece-wise linear convex function</li>
+  <li>How many pieces depending on how many elements in a group</li>
+</ul>
+
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2022/08/01/batch-normalization.html" data-toggle="tooltip" data-placement="top" title="Batch Normalization">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2022/08/16/Graph-Neural-Network-Notes.html" data-toggle="tooltip" data-placement="top" title="Graph Neural Network Notes">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

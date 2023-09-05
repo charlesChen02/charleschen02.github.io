@@ -1,0 +1,1163 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-09-05T16:25:34+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Charles’ Idea Warehourse</title><subtitle>Ideas come from thinking different.🌿</subtitle><entry><title type="html">Mac系统使用jekyll创建一个博客</title><link href="http://localhost:4000/2023/09/05/use-jekyll-to-build-blog.html" rel="alternate" type="text/html" title="Mac系统使用jekyll创建一个博客" /><published>2023-09-05T10:50:38+08:00</published><updated>2023-09-05T10:50:38+08:00</updated><id>http://localhost:4000/2023/09/05/use-jekyll-to-build-blog</id><content type="html" xml:base="http://localhost:4000/2023/09/05/use-jekyll-to-build-blog.html"><![CDATA[<p>因为hexo版本更新后总是有各种各样的问题，所以终于决定把现有的博客换掉了，目前的计划是使用jekyll</p>
+
+<h1 id="下载">下载</h1>
+
+<p>根据官方的教程，在mac上下载jekyll还是比较简单的：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+  gem install bundler jekyll
+
+  jekyll new my-awesome-site
+
+  cd my-awesome-site
+
+  bundle exec jekyll serve
+
+</code></pre></div></div>
+
+<p>因为mac本身自带了ruby和gem的包，所以可以直接使用对应的命令行</p>
+
+<p>但是本人在具体使用时直接报错：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(base) chaos@Charles-MacBook-Pro ~ % gem install bundler jekyll
+Fetching bundler-2.4.19.gem
+ERROR:  While executing gem ... (Gem::FilePermissionError)
+    You don't have write permissions for the /Library/Ruby/Gems/2.6.0 directory.
+</code></pre></div></div>
+<p>懒得进行问题定位和解决了，后面直接自己重新配置了一套ruby环境使用，省得遇到各种权限问题</p>
+
+<h2 id="使用自己下载的ruby环境进行配置">使用自己下载的ruby环境进行配置</h2>
+<p>使用homebrew重新下载ruby并进行对应配置：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew install ruby
+</code></pre></div></div>
+<p>安装完成后， 修改.bashrc文件, 使系统调用时使用brew下载的ruby而不是系统自带的文件:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo 'export PATH="/usr/local/opt/ruby/bin:$PATH"' &gt;&gt; ~/.zshrc
+source ~/.zshrc
+</code></pre></div></div>
+<p>ps: 路径需要配置为brew下载的ruby的bin路径位置, 可以通过</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew list ruby
+</code></pre></div></div>
+
+<p>查询ruby下载位置</p>
+
+<h3 id="配置gem运行环境">配置gem运行环境</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo 'export PATH="$HOME/.gem/ruby/X.X.0/bin:$PATH"' &gt;&gt; ~/.zshrc
+source ~/.zshrc
+</code></pre></div></div>
+<p>配置完成后就可以使用自己的ruby和gem下载jekyll</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem install --user-install bundler jekyll
+
+</code></pre></div></div>
+
+<h2 id="配置国内镜像源">配置国内镜像源</h2>
+
+<p>由于国内的防火墙阻断了和 ruby 服务器的链接，ruby 的资源文件存放在 Amazon 的服务器上，好像好多国外的云空间都存放在 Amazon 的服务器上，在中国都不能正常访问。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+$ gem sources -l
+https://gems.ruby-china.com
+</code></pre></div></div>
+
+<h1 id="创建一个新的blog">创建一个新的blog</h1>
+
+<p>根据官方的建议, 创建一个实例:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ jekyll new my-site
+$ cd my-site
+</code></pre></div></div>
+
+<p>进入目录后</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec jekyll serve
+
+</code></pre></div></div>
+<p>完成后就可以在 http://127.0.0.1:4000/ 查看jekyll的默认站点的样子了.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[因为hexo版本更新后总是有各种各样的问题，所以终于决定把现有的博客换掉了，目前的计划是使用jekyll]]></summary></entry><entry><title type="html">ShapePredictor 原理分析</title><link href="http://localhost:4000/2023/09/01/shapePredictor.html" rel="alternate" type="text/html" title="ShapePredictor 原理分析" /><published>2023-09-01T22:21:35+08:00</published><updated>2023-09-01T22:21:35+08:00</updated><id>http://localhost:4000/2023/09/01/shapePredictor</id><content type="html" xml:base="http://localhost:4000/2023/09/01/shapePredictor.html"><![CDATA[<h1 id="前言">前言</h1>
+
+<p>Dlib 库中的 shape predictor 是基于论文： One Millisecond Face Alignment with an Ensemble of Regression Trees 中提出的 ERT(Ensemble of Regression Trees) 级联回归树进行实现的, 通过进行特征选择并最小化损失函数.</p>
+
+<p><img src="intro.png" alt="" /></p>
+
+<!-- more -->
+
+<h1 id="级联回归器">级联回归器</h1>
+
+<p>记$x_i \in R^2$ 为图片$I$中的第 $i$ 个面部特征点,包括了该点的 $(x,y)$ 坐标, 同时使用向量 $S = (x_1^T, …, x_p^T)^T \in R^{2p}$ 作为图片 $I$ 中的所有 $p$ 个面部特征点, $\hat{S}^{(t)}$ 为当前对于 Ground Truth $S$ 的预测. 级联中的每一个回归器 $r_t( . , . )$ 预测基于当前的预测 $\hat{S}^{(t)}$ 的更新向量, 并添加到当前的形状预测器中来提高预测结果:</p>
+
+\[\hat{S}^{(t+1)} = \hat{S}^{(t)} + r_t(I, \hat{S}^{(t)})\]
+
+<p>因为$r_t$的预测是同时基于例如像素密集度这种从图像 $I$ 中计算的特征, 并且根据当前的图像预测器 $\hat{S}^{(t)}$ 作为索引. 这样为整个过程提供了几何不变性.</p>
+
+<p>在训练过程中, 每一个回归器 $r_t$ 使用梯度树提升(gradient tree boosting)与误差损失平方和(sum of square error loss).</p>
+
+<h1 id="训练级联回归器">训练级联回归器</h1>
+
+<h2 id="训练第一个回归器">训练第一个回归器</h2>
+
+<p>使用一个三元组来初始化最初的回归函数$r_0$, 其中包括一个面部图片, 一个初始形状预测和一个目标更新步长 $(I_{\pi_i}, \hat{S}_i^{(0)}, \Delta S_i^{(0)})$.</p>
+
+<p>其中:</p>
+
+\[\pi_i \in \{1, ..., n\} \\\]
+
+\[\hat{S}_i^{(0)} \in \lbrace S_1, ..., S_n \rbrace \not  S_{\pi_i}\\\]
+
+\[\Delta S_i^{(0)} = S_{\pi_i} - \hat{S}_i^{(0)}\]
+
+<p>三元组的总数为 $N = nR$, $R$ 为用于每一张照片的初始化数量. 每一个初始化的形状预测器从${ S_1, …, S_n}$ 中均匀采样.</p>
+
+<h2 id="单回归器内的梯度提升树训练">单回归器内的梯度提升树训练</h2>
+
+<p>输入: 三元组</p>
+
+\[\{(I_{\pi_i}, \hat{S}_i^{(t)}, \Delta S_i^{(t)})\}_{i=1}^N\]
+
+<p>和收缩因数$0 &lt; \gamma &lt; 1$</p>
+
+<p>初始化:</p>
+
+\[f_0(I, \hat{S}^{(t)}) = {argmin}_{\gamma \in R^{2p}} \sum_{i=1}^N || \Delta S_i^{(t)} - \gamma||^2\]
+
+<p>对于回归器中的梯度提升树 k = 1, …, K:</p>
+<ol>
+  <li>令 $i = 1, .., N$</li>
+</ol>
+
+\[r_{ik} =  \Delta S_i^{(t)} - f_{k-1}(I_{\pi_i}, \hat{S}_i^{(t)})\]
+
+<ol>
+  <li>使用一个回归树$g_k(I, \hat{S}<em>i^{(t)})$ 对目标 $r</em>{ik}$ 进行拟合</li>
+  <li>更新$f$</li>
+</ol>
+
+\[f_k(I, \hat{S}^{(t)}) = f_{k-1}(I, \hat{S}^{(t)}) + \gamma g_k(I, \hat{S}^{(t)})\]
+
+<p>输出 $r_t(I, \hat{S}^{(t)}) = f_K(I, \hat{S}^{(t)})$</p>
+
+<h2 id="回归器级联训练">回归器级联训练</h2>
+
+<p>通过上面的算法我们可以得到回归预测器$r_0$, 同时用于训练的初始三元组通过设定:</p>
+
+\[\hat{S}_i^{(t+1)} = \hat{S}_i^{(t)} + r_t(I, \hat{S}^{(t)}) \\
+\Delta S_i^{(t+1)} = S_{\pi_i} - S_i^{(t+1)}\]
+
+<p>被更新为了$(I_{\pi_i}, \hat{S}_i^{(1)}, \Delta S_i^{(1)})$, 对于下一个回归器 $r_1$,</p>
+
+<h2 id="回归树训练细节">回归树训练细节</h2>
+
+<p>在回归器的训练过程中, 关键点在于每个回归器内的梯度提升树对残差目标的拟合效果. 在文中共提出了三个方面:</p>
+
+<ul>
+  <li>形状无关的划分测试</li>
+  <li>选择节点划分</li>
+  <li>特征选择</li>
+</ul>
+
+<p>具体细节可以看原论文.</p>
+
+<p><img src="image.png" alt="" /></p>
+
+<h1 id="结语">结语</h1>
+
+<p>该算法给dlib库中的shape predictor提供了理论基础, 并且在dlib中最终选择使用68个landmark来让上文的级联回归树进行拟合, 在原文中也测试了400, 200, 80, 40, 20 等不同数量的初始形状数量.</p>
+
+<p><img src="conclu.png" alt="" /></p>]]></content><author><name></name></author><summary type="html"><![CDATA[前言]]></summary></entry><entry><title type="html">人脸识别项目实战笔记</title><link href="http://localhost:4000/2023/07/07/face-recognition-notes.html" rel="alternate" type="text/html" title="人脸识别项目实战笔记" /><published>2023-07-07T21:47:27+08:00</published><updated>2023-07-07T21:47:27+08:00</updated><id>http://localhost:4000/2023/07/07/face-recognition-notes</id><content type="html" xml:base="http://localhost:4000/2023/07/07/face-recognition-notes.html"><![CDATA[<h1 id="前言">前言</h1>
+
+<p>人脸识别的主要流程包括了: 人脸检测, 人脸归一化, 人脸信息编码 大致的三个流程. 其中人脸检测和人脸信息编码这两个部分可以使用深度学习模型进行数据的处理以达到更好的效果.</p>
+
+<p>除了从模型框架开始手搓整体的框架之外, 现有一些即插即用的人脸识别框架也能够满足项目部署的实际使用, 如 <code class="language-plaintext highlighter-rouge">deepface</code>, <code class="language-plaintext highlighter-rouge">dlib</code>, <code class="language-plaintext highlighter-rouge">opencv</code> 等. 在本篇博客中将分别介绍由自己构建的一套人脸识别框架, 以及使用 <code class="language-plaintext highlighter-rouge">dlib</code> 进行开发的流程</p>
+
+<h1 id="基于-facenet-和-retinaface-开发的框架">基于 FaceNet 和 RetinaFace 开发的框架</h1>
+
+<p>对于人脸识别的项目来说, 我们有一个存有人员面部照片的数据库 (身份证证件照), 当相机捕捉到新的人脸时, 我们需要与数据库中的照片进行比较. 判断人员的身份.</p>
+
+<h2 id="人脸信息注册">人脸信息注册</h2>
+
+<p>我们首先需要创建人脸数据信息的gallery, 大致的逻辑如下</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>对于数据库中的每张照片, 执行人脸检测, 人脸信息编码操作
+将保存的人脸信息存入文件中, 以待未来的使用
+</code></pre></div></div>
+
+<p>在项目中, 我们先使用 <code class="language-plaintext highlighter-rouge">Facenet</code> 进行目标的识别</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mtcnn</span> <span class="o">=</span> <span class="nc">MTCNN</span><span class="p">(</span><span class="n">image_size</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> 
+              <span class="n">margin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+              <span class="n">min_face_size</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> 
+              <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+              <span class="p">)</span>
+
+<span class="n">resnet</span> <span class="o">=</span> <span class="nc">InceptionResnetV1</span><span class="p">(</span><span class="n">classify</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                            <span class="n">pretrained</span><span class="o">=</span><span class="sh">'</span><span class="s">vggface2</span><span class="sh">'</span><span class="p">,</span>
+                            <span class="n">num_classes</span><span class="o">=</span><span class="mi">0</span>
+                           <span class="p">).</span><span class="nf">eval</span><span class="p">().</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>在实操中, <code class="language-plaintext highlighter-rouge">mtcnn</code> 和 <code class="language-plaintext highlighter-rouge">resnet</code> 分别用于人脸检测和信息编码.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">detect_faces</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+    <span class="n">img_face</span> <span class="o">=</span> <span class="nf">mtcnn</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+    <span class="n">img_embedding</span> <span class="o">=</span> <span class="nf">resnet</span><span class="p">(</span><span class="n">img_face</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">img_embedding</span><span class="p">,</span> <span class="n">file_name</span>
+
+</code></pre></div></div>
+
+<p>对于单张图片, 我们首先使用<code class="language-plaintext highlighter-rouge">mtcnn</code>进行人脸位置的检测, 之后我们使用<code class="language-plaintext highlighter-rouge">resnet</code>提取512D的人脸编码信息.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">person_names</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">face_embeddings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">folders</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="nf">tqdm</span><span class="p">(</span><span class="n">folders</span><span class="p">):</span>
+    <span class="n">new_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">+</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="o">+</span><span class="n">folder</span><span class="o">+</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">listdir</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nf">valid_extension</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">img_embedding</span><span class="p">,</span> <span class="n">person_name</span> <span class="o">=</span> <span class="nf">detect_faces</span><span class="p">(</span><span class="n">new_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                <span class="n">person_names</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">person_name</span><span class="p">)</span>
+                <span class="n">face_embeddings</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">img_embedding</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">())</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Registering {}</span><span class="sh">"</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">person_name</span><span class="p">))</span>
+            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Error occured during process</span><span class="sh">"</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                <span class="nf">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="c1"># store known info
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">registry.pkl</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">wb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">person_names</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">face_embeddings</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>最终我们遍历数据库中的每一个照片, 完成信息的登记流程</p>
+
+<h2 id="新照片人脸识别">新照片人脸识别</h2>
+
+<p>当相机拍摄到新的人脸时, 我们只需要进行与人脸注册时相同的人脸检测模型的流程, 便能够得到类似的人脸信息编码</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">facenet_recognition</span><span class="p">(</span><span class="n">image_path</span><span class="p">):</span>
+
+    <span class="k">global</span> <span class="n">face_embeddings</span><span class="p">,</span> <span class="n">person_names</span>
+    <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+        <span class="n">img_face</span> <span class="o">=</span> <span class="nf">mtcnn</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">img_embedding</span> <span class="o">=</span> <span class="nf">resnet</span><span class="p">(</span><span class="n">img_face</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="nf">detach</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img_embedding</span> <span class="o">=</span> <span class="nf">detect_faces_retinaface</span><span class="p">(</span><span class="n">image_path</span><span class="p">).</span><span class="nf">detach</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="p">[</span><span class="nf">distance</span><span class="p">(</span><span class="n">img_embedding</span><span class="p">,</span> <span class="n">ref_embedding</span><span class="p">)</span> <span class="k">for</span> <span class="n">ref_embedding</span> <span class="ow">in</span> <span class="n">face_embeddings</span><span class="p">]</span>
+    <span class="n">distances_names</span> <span class="o">=</span> <span class="nf">zip</span><span class="p">(</span><span class="o">*</span><span class="nf">sorted</span><span class="p">(</span><span class="nf">zip</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">person_names</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">distances_names</span>
+</code></pre></div></div>
+
+<p>其中, 我们可以使用 Euclidean Distance (L2) 来比较不同人脸编码之间的距离, 来作为比较不同人脸编码的差异:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">embeddings1</span><span class="p">,</span> <span class="n">embeddings2</span><span class="p">,</span> <span class="n">distance_metric</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># Euclidian distance
+</span>        <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">subtract</span><span class="p">(</span><span class="n">embeddings1</span><span class="p">,</span> <span class="n">embeddings2</span><span class="p">)</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">square</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dist</span>
+
+</code></pre></div></div>
+
+<h1 id="基于-dlib-实现的人脸识别框架">基于 <code class="language-plaintext highlighter-rouge">Dlib</code> 实现的人脸识别框架</h1>
+
+<p>TBC</p>]]></content><author><name></name></author><summary type="html"><![CDATA[前言]]></summary></entry><entry><title type="html">Terraform 基础使用方法与特性</title><link href="http://localhost:4000/2023/04/06/Terraform.html" rel="alternate" type="text/html" title="Terraform 基础使用方法与特性" /><published>2023-04-06T16:37:31+08:00</published><updated>2023-04-06T16:37:31+08:00</updated><id>http://localhost:4000/2023/04/06/Terraform</id><content type="html" xml:base="http://localhost:4000/2023/04/06/Terraform.html"><![CDATA[<h1 id="general">General</h1>
+
+<h2 id="1-是什么-what-is-terraform">1. 是什么 What is Terraform?</h2>
+
+<ul>
+  <li>用于基础设施置备 Infrastructure Provisioning</li>
+</ul>
+
+<blockquote>
+  <p>什么是<strong>基础设施置备</strong>?
+在我们需要将工程/系统部署到云端时, 我们通常需要准备对应的基础设施, 以 AWS 为例, 我们需要准备私有网络空间 Private network space, EC2服务器实例 server instances, 配置安全组 Security, 以及下载其他工具框架(如 Docker). 这一系列创建与准备工作一般认为是基础设施置备 Infrastructure Provisioning.</p>
+</blockquote>
+
+<!-- more -->
+
+<h2 id="ansible-和-terraform-的区别">Ansible 和 Terraform 的区别?</h2>
+
+<p>Difference between Ansible and Terraform?</p>
+
+<p>在官方文档中, Terraform的描述与Ansible很相似</p>
+
+<blockquote>
+  <p><strong>Terraform</strong>: Terraform Cloud enables infrastructure automation for provisioning, compliance, and management of any cloud, datacenter, and service.</p>
+
+  <p><strong>Ansible</strong>: Ansible is a suite of software tools that enables infrastructure as code. It is open-source and the suite includes software provisioning, configuration management, and application deployment functionality.</p>
+</blockquote>
+
+<p>相同点:</p>
+
+<ul>
+  <li>
+    <p>同样是IaaC(Infrastrucutre as a Code)</p>
+  </li>
+  <li>
+    <p>都自动化了基础设施的置备, 配置, 以及管理</p>
+  </li>
+</ul>
+
+<p>不同点:</p>
+
+<ul>
+  <li>Terraform 主要是基础设施置备工具, 同时可以用于部署程序</li>
+  <li>Ansible 主要是配置管理工具, 这意味着Ansible更多倾向于管理<strong>已经置备完成</strong>的基础设施, 并对其进行配置, 部署, 更新软件等</li>
+</ul>
+
+<p>基于上面两个工具的区别, 我们通常可以同时使用两者, 使用Terraform进行基础设施置备, 并使用Ansible进行配置管理</p>
+
+<h2 id="工具特点-characteristics">工具特点 Characteristics</h2>
+
+<ul>
+  <li>开源 Open Source</li>
+  <li>声明式 Declarative</li>
+</ul>
+
+<blockquote>
+  <p>什么是 Declarative 语句?
+在配置文件中, 你只需要定义最终状态 (end state) – <strong>What</strong></p>
+
+  <p>比如说, 你可以声明, 需要5台有特定配置的服务器; 拥有特定权限的 AWS user</p>
+
+  <p>相对的命令式 Imperative 语句定义了具体的每一步应该如何执行 – <strong>How</strong></p>
+
+  <p>Declarative 语句在更新基础设施时更加简单</p>
+
+  <p>Imperative: 移除两个服务器, 添加防火墙配置, 增加 AWS user 权限 – 由管理员给出指示</p>
+
+  <p>Declarative: 现在我们有n-2个服务器, 使用这个防火墙配置, AWS user 有如下的权限 – 由工具自己确定哪些需要完成</p>
+</blockquote>
+
+<h2 id="使用场景">使用场景</h2>
+
+<ul>
+  <li>管理现有基础设施
+    <ul>
+      <li>创建</li>
+      <li>修改</li>
+    </ul>
+  </li>
+  <li>复制基础设施</li>
+</ul>
+
+<h2 id="terraform-架构">Terraform 架构</h2>
+
+<h3 id="core">Core</h3>
+
+<p>输入:</p>
+
+<p>TF-config: 用户配置的设置 (目标配置)</p>
+
+<p>State: 当前阶段的设置 (当前配置)</p>
+
+<p>作用:</p>
+
+<p>Core通过比较两个输入, 作出执行计划: 哪些需要创建/更新/销毁?</p>
+
+<h3 id="服务提供者-providers">服务提供者 Providers</h3>
+
+<p>IaaS: AWS / Azure</p>
+
+<p>PaaS: Kubernetes</p>
+
+<p>SaaS: Fastly</p>
+
+<p>通过对应的 Provider 完成基础设施配置</p>
+
+<h1 id="基础命令">基础命令</h1>
+
+<p><strong>refresh</strong></p>
+
+<p>询问基础设施提供者获取当前 State</p>
+
+<p><strong>plan</strong></p>
+
+<p>创建执行计划</p>
+
+<p>决定需要执行哪些动作来到达目标 State</p>
+
+<p><strong>apply</strong></p>
+
+<p>执行 plan 中创建的计划</p>
+
+<p><strong>destroy</strong></p>
+
+<p>摧毁资源/基础设施</p>
+
+<h1 id="实践">实践</h1>
+
+<ol>
+  <li>下载</li>
+</ol>
+
+<ul>
+  <li>MacOS</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; brew install terraform
+# 使用 homebrew 下载
+&gt; terraform -v
+# 查看版本号, 确认安装成功
+</code></pre></div></div>
+
+<ul>
+  <li>Win</li>
+  <li>Linux</li>
+</ul>
+
+<p>创建一个配置文件</p>
+
+<p>倒入服务 provider 及其一些基础变量</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>provider “aws" {
+    region = "us-east-1"
+} 
+</code></pre></div></div>
+
+<h2 id="创建资源">创建资源</h2>
+
+<p>基本语法</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>resources "&lt;provider&gt;_&lt;services&gt;" "name" {
+
+    param1 = ""
+    param2 = “”
+}
+
+</code></pre></div></div>
+
+<p>terraform 命令</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;terrafrom init
+
+Initializing the backend...
+
+Initializing provider plugins...
+
+</code></pre></div></div>
+<p>用于初始化terraform后端, 下载对应的provider 插件</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+&gt; terraform plan 
+......
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+</code></pre></div></div>
+
+<p>规划, 检查语句, 规划对应更新</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;terraform apply
+...
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+</code></pre></div></div>
+
+<p>具体执行代码</p>
+
+<h2 id="修改资源">修改资源</h2>
+
+<p>当我们执行完成后, 如果我们再执行一次 apply, 会是什么结果?</p>
+
+<p>因为terraform使用declarative语言, config文件中定义的是基础设施的最终状态, 也就是说, 如果使用目前的config, 不论我们执行多少次 apply, 在AWS中都只会存在一个instance</p>
+
+<h2 id="删除资源">删除资源</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;terrafrom destroy
+
+</code></pre></div></div>
+<p>删除所有基础设施</p>
+
+<h2 id="引用资源">引用资源</h2>
+
+<p>接下来尝试在AWS中创建一个subnet.</p>
+
+<p>在AWS中subnet需要在VPC中进行创建, 也就是说我们需要对创建的VPC进行引用</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>resource "aws_vpc" "first-vpc" {
+    cidr_block = "10.0.0.0/16"
+    tags = {
+      "Name" = "production"
+    }
+}
+
+resource "aws_subnet" "subnet-1" {
+    vpc_id = aws_vpc.first-vpc.id
+    cidr_block = "10.0.1.0/24"
+    tags = {
+      "Name" = "prod-subnet"
+    }
+  
+}
+
+</code></pre></div></div>
+
+<p>在这里 我们使用<code class="language-plaintext highlighter-rouge">vpc_id = aws_vpc.first-vpc.id</code>对vpc的id进行引用</p>
+
+<ul>
+  <li>在这里, 两个resources的资源定义顺序<strong>不会</strong>影响引用的效果, terraform会自动确定资源之间的依赖关系</li>
+</ul>
+
+<h2 id="terraform-相关文件">Terraform 相关文件</h2>
+
+<ul>
+  <li>.terraform文件夹</li>
+</ul>
+
+<p>在使用init, plan, deploy等相关命令中, 会有相关文件被自动加载在 .terraform 文件夹中 (类似.git)</p>
+
+<ul>
+  <li>terraform.tfstate</li>
+</ul>
+
+<p>存储了当前的config定义的state状态</p>
+
+<h2 id="other-commands">Other Commands</h2>
+
+<ul>
+  <li>terraform state list</li>
+</ul>
+
+<p>展现 terraform 中所有的 resources</p>
+
+<ul>
+  <li>terraform state show &lt;name of resource&gt;</li>
+</ul>
+
+<p>展现某个具体 resource 的细节</p>
+
+<p>如果我们想要在<code class="language-plaintext highlighter-rouge">terraform apply</code>完成后自动print对应的资源细节, 在tf文件中添加对应的output</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>output "server_public_ip" {
+  value = aws_eip.one.public_ip
+}
+
+</code></pre></div></div>
+
+<p>之后当执行<code class="language-plaintext highlighter-rouge">terraform apply</code> 时, 在命令行中就可以自动打印对应的信息</p>
+
+<p>在文件中定义之后, 可以使用 <code class="language-plaintext highlighter-rouge">terraform output</code> 直接查看部署时获得的output. 同时, 我们也可以通过<code class="language-plaintext highlighter-rouge">terraform refresh</code> 刷新对应output的状态</p>
+
+<ul>
+  <li>定位resource</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; terraform destroy -target aws_instance.web-server-instance
+
+</code></pre></div></div>
+
+<p>通过定义 <code class="language-plaintext highlighter-rouge">-target</code> 旗帜来具体的删除某个资源</p>
+
+<p>同样的, 我们也可以在<code class="language-plaintext highlighter-rouge">terraform apply</code> 时定义<code class="language-plaintext highlighter-rouge">-target</code>来具体的启动某一个资源</p>
+
+<h2 id="variables">Variables</h2>
+
+<p>terraform 支持定义变量variables来是我们对于某些变量的定义</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>variable "subnet_prefix" {
+    description = “cidr block for the subnet”
+    # default 
+    type = string
+}
+</code></pre></div></div>
+<p>一个变量有如上三个可选属性</p>
+
+<h3 id="引用变量">引用变量</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>resource "aws_subne" "subnet-1" {
+  vpc_id = aws_vpc.prod-vpc.id
+  cidr_block = var.subnet_prefix
+  ...
+}
+
+</code></pre></div></div>
+
+<p>上面我们使用<code class="language-plaintext highlighter-rouge">var.subnet_prefix</code>定义了<code class="language-plaintext highlighter-rouge">cidr_block</code>的内容, 如果这时候我们再执行<code class="language-plaintext highlighter-rouge">terraform apply</code>, terraform会在命令行中要求我们填写对应变量的值</p>
+
+<ol>
+  <li>
+    <p>prompt 传值
+当然这样在执行的时候会需要我们对于每一个prompt都要输入对应变量的值,实际操作很麻烦</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">-var</code> 传值
+我们可以在<code class="language-plaintext highlighter-rouge">terraform apply</code>时增加<code class="language-plaintext highlighter-rouge">-var</code>并定义对应变量的值, 这样就不需要使用prompt的模式填写变量了</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">.tfvars</code> 传值
+在实际使用中, 更常用的方法其实是使用的一个单独的文件来进行变量的存储. 在执行terraform命令时, 会自动查找一个 <code class="language-plaintext highlighter-rouge">terraform.tfvars</code> 的文件, 我们可以在这个文件中定义对应变量的名称, 从而减少输入命令行时的重复操作</p>
+  </li>
+</ol>
+
+<p>in terraform.tfvars</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>subnet_prefix = "10.0.0.0/24"
+</code></pre></div></div>
+
+<p>此外, 我们可以重命名此变量文件, 并在<code class="language-plaintext highlighter-rouge">terraform apply</code>时使用 <code class="language-plaintext highlighter-rouge">-var-file</code> 确定具体需要使用的var文件</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;terraform apply -var-file example.tfvars
+
+</code></pre></div></div>
+
+<p>使用这种方法可以让我们更加方便的对于不同配置的集群进行不同变量定义的部署</p>]]></content><author><name></name></author><category term="DevOps" /><category term="Tools" /><summary type="html"><![CDATA[General]]></summary></entry><entry><title type="html">Graph Neural Network Notes</title><link href="http://localhost:4000/2022/08/16/Graph-Neural-Network-Notes.html" rel="alternate" type="text/html" title="Graph Neural Network Notes" /><published>2022-08-16T20:59:41+08:00</published><updated>2022-08-16T20:59:41+08:00</updated><id>http://localhost:4000/2022/08/16/Graph-Neural-Network-Notes</id><content type="html" xml:base="http://localhost:4000/2022/08/16/Graph-Neural-Network-Notes.html"><![CDATA[<blockquote>
+  <p>Video Link on Youtube: <a href="https://www.youtube.com/watch?v=zCEYiCxrL_0">An Introduction to Graph Neural Networks: Models and Applications</a></p>
+</blockquote>
+
+<h1 id="intro">Intro</h1>
+
+<h2 id="distributed-vector-representations">Distributed Vector Representations</h2>
+
+<p><img src="./image-20220531111133794.png" alt="image-20220531111133794" /></p>
+
+<p>From one-hot -&gt; multiply with embedding matrix and get distributed rep.</p>
+
+<p><img src="./image-20220531111258366.png" alt="image-20220531111258366" /></p>
+
+<!-- more -->
+
+<h2 id="graph-notation-basics">Graph Notation Basics</h2>
+
+<ul>
+  <li>Nodes/Vertices</li>
+  <li>Edges</li>
+  <li>$G=(V,E)$</li>
+</ul>
+
+<h1 id="graph-neural-network">Graph Neural Network</h1>
+
+<p>By training, each node’s vector contains information relative to the whole graph, instead of the initial representation.</p>
+
+<p><img src="./image-20220531111630964.png" alt="image-20220531111630964" /></p>
+
+<ul>
+  <li>
+    <p>GNNs Synchronous Message Passing (All-to-All)</p>
+  </li>
+  <li>
+    <p>Output:</p>
+    <ul>
+      <li>Node selection</li>
+      <li>Node classification</li>
+      <li>Graph classification</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="gated-gnns">Gated GNNs</h2>
+
+<p><img src="./image-20220531121358147.png" alt="image-20220531121358147" /></p>
+
+<p>GRU: Gated Recurrent Network</p>
+
+<p><img src="./image-20220531121450912.png" alt="image-20220531121450912" /></p>
+
+<ul>
+  <li>permutation invariant -&gt; Sum</li>
+</ul>
+
+<h2 id="gcn">GCN</h2>
+
+<p><strong>Trick 1: backwards Edges</strong></p>
+
+<p><img src="./image-20220531121608345.png" alt="image-20220531121608345" /></p>
+
+<ul>
+  <li>For each forward edge, add a backward edge</li>
+</ul>
+
+<h2 id="graph-notations---adjacency-matrix">Graph Notations - Adjacency Matrix</h2>
+
+<p><img src="./image-20220531121936642.png" alt="image-20220531121936642" /></p>
+
+<h2 id="ggnn-as-matrix-operation">GGNN as Matrix Operation</h2>
+
+<p><img src="./image-20220531122100994.png" alt="image-20220531122100994" /></p>
+
+<h1 id="express-as-code">Express as code</h1>
+
+<ul>
+  <li>einsum</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">bd,qd-&gt;bq</span><span class="sh">'</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">abs,be,abq-&gt;cqe</span><span class="sh">'</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="./image-20220531122456233.png" alt="image-20220531122456233" /></p>
+
+<p><img src="./image-20220531122502189.png" alt="image-20220531122502189" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">GGNN</span><span class="p">(</span><span class="n">initial_node_states</span><span class="p">,</span> <span class="n">adj</span><span class="p">):</span>
+    <span class="n">node_states</span> <span class="o">=</span> <span class="n">initial_node_states</span> <span class="c1">#[N,D]
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_message_types</span><span class="p">):</span>
+            <span class="n">message</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">nd,dm-nm</span><span class="sh">'</span><span class="p">,</span> <span class="n">edge_transform</span><span class="p">,</span> <span class="n">node_states</span><span class="p">)</span> <span class="c1"># [N, M]
+</span>        <span class="n">received_messages</span> <span class="o">=</span> <span class="nf">zeros</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span> <span class="c1"># (N, M)
+</span>        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_message_types</span><span class="p">):</span>
+            <span class="n">received_messages</span> <span class="o">+=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">nm,ml-&gt;lm</span><span class="sh">'</span><span class="p">,</span> <span class="n">message</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">adj</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="n">node_states</span> <span class="o">=</span> <span class="nc">GRU</span><span class="p">(</span><span class="n">node_states</span><span class="p">,</span> <span class="n">received_messages</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">node_states</span>
+  
+</code></pre></div></div>
+<p><strong>Notes</strong>: The adjancency matrix can be very large and sparse</p>
+
+<h1 id="common-arch-of-deep-learning-code">Common Arch of Deep Learning Code</h1>
+
+<p><img src="./image-20220531123935257.png" alt="image-20220531123935257" /></p>]]></content><author><name></name></author><category term="Computer Vision" /><category term="GNN" /><category term="Machine Learning" /><category term="Notes" /><summary type="html"><![CDATA[Video Link on Youtube: An Introduction to Graph Neural Networks: Models and Applications]]></summary></entry><entry><title type="html">Commonly used Activation functions</title><link href="http://localhost:4000/2022/08/01/Activations.html" rel="alternate" type="text/html" title="Commonly used Activation functions" /><published>2022-08-01T23:33:12+08:00</published><updated>2022-08-01T23:33:12+08:00</updated><id>http://localhost:4000/2022/08/01/Activations</id><content type="html" xml:base="http://localhost:4000/2022/08/01/Activations.html"><![CDATA[<h1 id="activation-functions">Activation functions</h1>
+
+<h2 id="why-we-need">Why we need?</h2>
+
+<ul>
+  <li>add non-linear factor, solve the problem that linear models cannot represent</li>
+  <li>Provide better interpretability to the model</li>
+</ul>
+
+<!-- more -->
+
+<h1 id="common-activations">Common activations</h1>
+
+<h2 id="sigmoid">Sigmoid</h2>
+
+\[sig(z) = \frac{1}{e^{-z} + 1}\]
+
+\[sig'(z) = sig(z)(1 - sig(z))\]
+
+<p><img src="./image-20220801155322452.png" alt="image-20220801155322452" /></p>
+
+<ul>
+  <li>cons
+    <ul>
+      <li>left and right all saturated, gradient vanishing</li>
+      <li>exponential computation</li>
+      <li>not zero-centered, lower convergence speed</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="tanh">tanh</h2>
+
+\[tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}\]
+
+<p><img src="./image-20220801155920512.png" alt="image-20220801155920512" /></p>
+
+<p>range from (-1, 1)</p>
+
+<p>adv:</p>
+
+<ul>
+  <li>compared with sigmoid
+    <ul>
+      <li>faster convergence speed, larger slope near 0</li>
+      <li>output mean 0</li>
+      <li>larger saturated space</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="softmax">Softmax</h2>
+
+\[softmax(z) = \frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}\]
+
+<h2 id="relu">relu</h2>
+
+<p><img src="./image-20220801160538133.png" alt="image-20220801160538133" /></p>
+
+<p>dead relu problem: when $ x &lt; 0 $ , ReLU output 0, when backpropagation, the gradient always 0, parameter will never be updated.</p>
+
+<ul>
+  <li>adv:
+    <ul>
+      <li>easy computation</li>
+      <li>more similar to bio-inspired mechanism compared to tanh, sigmoid</li>
+      <li>does not saturate, solve vanishing gradient</li>
+      <li>fast convergence</li>
+    </ul>
+  </li>
+  <li>cons:
+    <ul>
+      <li>not zero centered</li>
+      <li>dead relu problem</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="leaky-relu">leaky relu</h2>
+
+\[LeakyReLU(x) = max(0.01x, x)\]
+
+<p>adv:</p>
+
+<ul>
+  <li>no dead relu problem</li>
+</ul>
+
+<h2 id="elu">elu</h2>
+
+\[ELU(x) = x, x &gt; 0\\
+ELU(x) = \alpha(e^x - 1), x \leq 0\]
+
+<ul>
+  <li>adv
+    <ul>
+      <li>mean activation close to 0</li>
+      <li>more robust to noise</li>
+    </ul>
+  </li>
+  <li>con
+    <ul>
+      <li>exponential computation</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="maxout">maxout</h2>
+
+<p><img src="maxout1.webp" alt="" /></p>
+
+<p><img src="maxout2.webp" alt="" /></p>
+
+<p>It is a learnable activation function</p>
+<ul>
+  <li>Activation function in <strong>maxout</strong> network can be any piece-wise linear convex function</li>
+  <li>How many pieces depending on how many elements in a group</li>
+</ul>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Activation" /><category term="Deep Learning" /><category term="Notes" /><summary type="html"><![CDATA[Activation functions]]></summary></entry><entry><title type="html">Batch Normalization</title><link href="http://localhost:4000/2022/08/01/batch-normalization.html" rel="alternate" type="text/html" title="Batch Normalization" /><published>2022-08-01T20:09:30+08:00</published><updated>2022-08-01T20:09:30+08:00</updated><id>http://localhost:4000/2022/08/01/batch-normalization</id><content type="html" xml:base="http://localhost:4000/2022/08/01/batch-normalization.html"><![CDATA[<h1 id="why">Why</h1>
+
+<p>Model is updated layer-by-layer backward from the output to the input using estimate of error</p>
+
+<p>Because all layers are changed during an update, the update procedure is forever chasing a moving target</p>
+
+<!-- more -->
+
+<p>E.g. the weights of a layer are updated expecting the prior layer outputs values with given distribution, but this distribution will change after the weights of the prior layers are updated</p>
+
+<h2 id="internal-covariate-shift">Internal Covariate Shift</h2>
+
+<p>The the gradient descent proceed, the parameters in each layer would update, making the output distribution change, therefore the tar for the next layer changes, the next layers has to learn the distribution that keeps changing.</p>
+
+<h3 id="influence">Influence</h3>
+
+<ul>
+  <li>deep layers have to keep adjusting to learning the input distribution, lower the convergence speed.</li>
+  <li>the training tend to go to the saturated space of the activation
+    <ul>
+      <li>Solution
+        <ol>
+          <li>Using non saturated activation function</li>
+          <li>make the input distribution of the activation in a stable situation, to help it away from the saturated place.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="what">What</h1>
+
+<p>Batch Normalization is proposed as a technique to help coordinate the update of multiple layers in the model</p>
+
+<p>Scaling the output of the layer, by standardizing the activations of each input variable per mini-batch, such as the activations of a node from the previous layer. (Standardization refers to rescaling data to have a mean of zero and standard deviation of one)</p>
+
+<p>Standardizing the activations of the prior layer means that assumptions the subsequent layer makes about the spread and distribution of inputs during the weight update will not change dramatically.</p>
+
+<p>This has the effect of stabilizing and speeding-up the training process of deep neural networks.</p>
+
+<p>Normalizing the inputs to the layers has an effect on the training of the model, dramatcally reducing the number of epochs required. It can also have a regularizing effect. Reducing generalization error much like the use of activation regularization.</p>
+
+<h2 id="equations">Equations</h2>
+
+\[\hat x = \frac{x - mean}{\sqrt{var + eps}}\]
+
+<p>use two extra parameter $\gamma$  and $\beta$ to make recover the expression ability for the data:
+\(\hat Z_j = \gamma_j Z_j + \beta_j\)
+During testing, we use the average mean and variance from the training procedure:
+\(\mu_{test} = E(\mu_{batch})\)</p>
+
+<h2 id="whitening">Whitening</h2>
+
+<p>PCA whitening and ZCA whitening for each layer in every epoch</p>
+
+<h3 id="aim">Aim:</h3>
+
+<ul>
+  <li>make the input features have the same mean and standard deviation</li>
+  <li>remove relevance between features</li>
+</ul>
+
+<h2 id="batch-normalization">Batch Normalization</h2>
+
+<h3 id="why-not-using-whitening">why not using whitening?</h3>
+
+<ul>
+  <li>Expensive computation cost</li>
+  <li>Whitening process change the distribution of each layer, therefore change the expressiveness of data in each layer. The parameters learned in lower layers would get lost by whitening.</li>
+</ul>
+
+<h3 id="idea">Idea</h3>
+
+<p>simplify the computation, normalization for every features, and let every feature has mean 0 and deviation</p>
+
+<p>add the linear transform to make those data revive their expressiveness as much as possible</p>
+
+<h1 id="batch-renormalization">Batch Renormalization</h1>
+
+<p>For small mini-batches that do not contain a representative distribution of examples from the training dataset, the difference in the standarized inputs between training and inference can result in noticeable difference in performance.</p>
+
+<p>Batch Renormalization makes the estimate of the variable mean and standard deviation more stable across mini-batches.</p>
+
+<h1 id="practice">Practice</h1>
+
+<p>In practice, it is common to allow the layer to learn a new mean and standard deviation, beta and gamma, that wallow the automatic scaling and shifting of the standarized layer inputs.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+
+
+<span class="sh">'''</span><span class="s">
+X.shape = [b, c, h, w] for 2d
+X.shape = [b, d] for 1d
+</span><span class="sh">'''</span>
+<span class="k">def</span> <span class="nf">batch_norm</span><span class="p">(</span><span class="n">is_training</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">moving_mean</span><span class="p">,</span> <span class="n">moving_var</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">is_training</span><span class="p">:</span>
+      	<span class="n">X_h</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">moving_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">moving_var</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      	<span class="n">feature_shape</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">feature_shae</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">feature_shape</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+         <span class="c1"># for norm1d
+</span>        		<span class="n">mean</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+          	<span class="n">var</span> <span class="o">=</span> <span class="p">((</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+          	<span class="n">mean</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">keepdim</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="p">((</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">keepdim</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">X_h</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+        
+        <span class="c1"># momentum smoothing
+</span>        <span class="n">moving_mean</span> <span class="o">=</span> <span class="n">momentum</span> <span class="o">*</span> <span class="n">moving_mean</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">momentum</span><span class="p">)</span> <span class="o">*</span> <span class="n">mean</span>
+        <span class="n">moving_var</span> <span class="o">=</span> <span class="n">momentum</span> <span class="o">*</span> <span class="n">moving_var</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">momentum</span><span class="p">)</span> <span class="o">*</span> <span class="n">var</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">X_h</span> <span class="o">+</span> <span class="n">beta</span>
+  	<span class="k">return</span> <span class="n">Y</span><span class="p">,</span> <span class="n">moving_mean</span><span class="p">,</span> <span class="n">moving_var</span>
+
+<span class="k">class</span> <span class="nc">_BatchNorm</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+  	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">num_dims</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+    		<span class="nf">super</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">num_dims</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+          	<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_dims</span><span class="p">)</span>
+       	<span class="k">else</span><span class="p">:</span>
+          	<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+      	<span class="n">Y</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span> <span class="o">=</span> <span class="nf">batch_norm</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">is_training</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">gamma</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_mean</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">moving_var</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">momentum</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">momentum</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y</span>
+<span class="k">class</span> <span class="nc">BatchNorm1d</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">BatchNorm2d</span><span class="p">(</span><span class="n">_BatchNorm</span><span class="p">):</span>
+  	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">nums_features</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<h1 id="comparison">Comparison</h1>
+
+<h2 id="with-layer-normalization">With layer normalization</h2>
+
+<ul>
+  <li>
+    <p>BN work for a batch of training examples, where LN work for single sample.</p>
+  </li>
+  <li>BN standardize across features for samples, where LN standardize for all features in the single sample</li>
+  <li>LN better used in NLP</li>
+</ul>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Batch Normalization" /><summary type="html"><![CDATA[Why]]></summary></entry><entry><title type="html">Use T-SNE for a better visualization</title><link href="http://localhost:4000/2022/07/11/TSNE-notes.html" rel="alternate" type="text/html" title="Use T-SNE for a better visualization" /><published>2022-07-11T18:31:11+08:00</published><updated>2022-07-11T18:31:11+08:00</updated><id>http://localhost:4000/2022/07/11/TSNE-notes</id><content type="html" xml:base="http://localhost:4000/2022/07/11/TSNE-notes.html"><![CDATA[<h1 id="definition">Definition</h1>
+
+<p>t-distributed stochastic neighbor embedding (t-SNE) is a methods to visualise high dimension data by transforming each data into a two or three dimensional map. It models in a way that similar objects are modeled by nearby points and dissimilar objects are modelled by distant points with high probability.</p>
+
+<!-- more -->
+
+<h1 id="stages">Stages</h1>
+
+<ol>
+  <li>constructs a probability distribution over pairs of high-dimensional objects in such a way that similar objects are assigned a higher probability while dissimilar points are assigned a lower probability.</li>
+  <li>t-SNE defines a similar probability distribution over the points in the low-dimensional map, and it minimise the KL divergence between the two distributions with respect to the locations of the points in the map.</li>
+</ol>
+
+<h1 id="demo-code">Demo Code</h1>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># simple example
+</span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="n">sklearn.manifold</span> <span class="kn">import</span> <span class="n">TSNE</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">X_embedded</span> <span class="o">=</span> <span class="nc">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="sh">'</span><span class="s">auto</span><span class="sh">'</span><span class="p">,</span><span class="n">init</span><span class="o">=</span><span class="sh">'</span><span class="s">random</span><span class="sh">'</span><span class="p">).</span><span class="nf">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">X_embedded</span><span class="p">.</span><span class="n">shape</span>
+</code></pre></div></div>
+
+<h2 id="parameters-for-sklearnmanifoldtsne">Parameters for sklearn.manifold.TSNE</h2>
+
+<blockquote>
+  <p>Source: <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html"><code class="language-plaintext highlighter-rouge">sklearn.manifold</code>.TSNE</a></p>
+</blockquote>
+
+<p>Parameters:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>n_components: int, default=2
+Dimension of the embedded space.
+
+perplexity: float, default=30.0
+The perplexity is related to the number of nearest neighbors that is used in other manifold learning algorithms. Larger datasets usually require a larger perplexity. Consider selecting a value between 5 and 50. Different values can result in significantly different results.
+
+early_exaggeration: float, default=12.0
+Controls how tight natural clusters in the original space are in the embedded space and how much space will be between them. For larger values, the space between natural clusters will be larger in the embedded space. Again, the choice of this parameter is not very critical. If the cost function increases during initial optimization, the early exaggeration factor or the learning rate might be too high.
+
+learning_rate: float or ‘auto’, default=200.0
+The learning rate for t-SNE is usually in the range [10.0, 1000.0]. If the learning rate is too high, the data may look like a ‘ball’ with any point approximately equidistant from its nearest neighbours. If the learning rate is too low, most points may look compressed in a dense cloud with few outliers. If the cost function gets stuck in a bad local minimum increasing the learning rate may help. Note that many other t-SNE implementations (bhtsne, FIt-SNE, openTSNE, etc.) use a definition of learning_rate that is 4 times smaller than ours. So our learning_rate=200 corresponds to learning_rate=800 in those other implementations. The ‘auto’ option sets the learning_rate to max(N / early_exaggeration / 4, 50) where N is the sample size, following [4] and [5]. This will become default in 1.2.
+
+n_iter: int, default=1000
+Maximum number of iterations for the optimization. Should be at least 250.
+
+n_iter_without_progress: int, default=300
+Maximum number of iterations without progress before we abort the optimization, used after 250 initial iterations with early exaggeration. Note that progress is only checked every 50 iterations so this value is rounded to the next multiple of 50.
+
+New in version 0.17: parameter n_iter_without_progress to control stopping criteria.
+
+min_grad_norm: float, default=1e-7
+If the gradient norm is below this threshold, the optimization will be stopped.
+
+metricstr or callable, default=’euclidean’
+The metric to use when calculating distance between instances in a feature array. If metric is a string, it must be one of the options allowed by scipy.spatial.distance.pdist for its metric parameter, or a metric listed in pairwise.PAIRWISE_DISTANCE_FUNCTIONS. If metric is “precomputed”, X is assumed to be a distance matrix. Alternatively, if metric is a callable function, it is called on each pair of instances (rows) and the resulting value recorded. The callable should take two arrays from X as input and return a value indicating the distance between them. The default is “euclidean” which is interpreted as squared euclidean distance.
+
+metric_params: dict, default=None
+Additional keyword arguments for the metric function.
+
+New in version 1.1.
+
+init: {‘random’, ‘pca’} or ndarray of shape (n_samples, n_components), default=’random’
+Initialization of embedding. Possible options are ‘random’, ‘pca’, and a numpy array of shape (n_samples, n_components). PCA initialization cannot be used with precomputed distances and is usually more globally stable than random initialization. init='pca' will become default in 1.2.
+
+verbose: int, default=0
+Verbosity level.
+
+random_state: int, RandomState instance or None, default=None
+Determines the random number generator. Pass an int for reproducible results across multiple function calls. Note that different initializations might result in different local minima of the cost function. See Glossary.
+
+method: str, default=’barnes_hut’
+By default the gradient calculation algorithm uses Barnes-Hut approximation running in O(NlogN) time. method=’exact’ will run on the slower, but exact, algorithm in O(N^2) time. The exact algorithm should be used when nearest-neighbor errors need to be better than 3%. However, the exact method cannot scale to millions of examples.
+
+New in version 0.17: Approximate optimization method via the Barnes-Hut.
+
+angle: float, default=0.5
+Only used if method=’barnes_hut’ This is the trade-off between speed and accuracy for Barnes-Hut T-SNE. ‘angle’ is the angular size (referred to as theta in [3]) of a distant node as measured from a point. If this size is below ‘angle’ then it is used as a summary node of all points contained within it. This method is not very sensitive to changes in this parameter in the range of 0.2 - 0.8. Angle less than 0.2 has quickly increasing computation time and angle greater 0.8 has quickly increasing error.
+
+n_jobs: int, default=None
+The number of parallel jobs to run for neighbors search. This parameter has no impact when metric="precomputed" or (metric="euclidean" and method="exact"). None means 1 unless in a joblib.parallel_backend context. -1 means using all processors. See Glossary for more details.
+
+New in version 0.22.
+
+square_distances: True, default=’deprecated’
+This parameter has no effect since distance values are always squared since 1.1.
+</code></pre></div></div>
+
+<p>Attributes:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>embedding_: array-like of shape (n_samples, n_components)
+Stores the embedding vectors.
+
+kl_divergence_: float
+Kullback-Leibler divergence after optimization.
+
+n_features_in_: int
+Number of features seen during fit.
+
+New in version 0.24.
+
+feature_names_in_: ndarray of shape (n_features_in_,)
+Names of features seen during fit. Defined only when X has feature names that are all strings.
+
+New in version 1.0.
+
+n_iter_: int
+Number of iterations run.
+</code></pre></div></div>
+
+<p>Methods:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[,</span><span class="n">y</span><span class="p">])</span> <span class="c1"># fit X into a embedded space
+</span><span class="nf">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">[,</span><span class="n">y</span><span class="p">])</span> <span class="c1"># fit X into an embedded space and return that transformed output
+</span><span class="nf">get_params</span><span class="p">([</span><span class="n">deep</span><span class="p">])</span> <span class="c1"># Get parameters for this estimator
+</span><span class="nf">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="c1"># set the parameters of this estimator
+</span></code></pre></div></div>
+
+<h1 id="algorithm-details">Algorithm details</h1>
+
+<h1 id="compare-to-other-dimensionality-reduction-methods">Compare to other dimensionality reduction methods</h1>
+
+<h2 id="pca">PCA</h2>
+
+<p>dense data</p>
+
+<h2 id="truncated-svd">Truncated SVD</h2>
+
+<p>sparse data</p>]]></content><author><name></name></author><category term="t-SNE" /><category term="Machine Learning" /><category term="Visualization" /><category term="Notes" /><summary type="html"><![CDATA[Definition]]></summary></entry><entry><title type="html">RandLA Network Analysis</title><link href="http://localhost:4000/2022/06/23/RandLA-reading-Notes.html" rel="alternate" type="text/html" title="RandLA Network Analysis" /><published>2022-06-23T21:44:52+08:00</published><updated>2022-06-23T21:44:52+08:00</updated><id>http://localhost:4000/2022/06/23/RandLA-reading-Notes</id><content type="html" xml:base="http://localhost:4000/2022/06/23/RandLA-reading-Notes.html"><![CDATA[<blockquote>
+  <p>Abstract: Notes for Architecture and building blocks for the RandLA which is implemented in the experiment</p>
+</blockquote>
+
+<!-- more -->
+
+<h1 id="building-blocks">Building Blocks</h1>
+<ol>
+  <li>
+    <p>Local feature aggregation
+  1.Local Spatial encoding (LocSE)
+       <img src="./image-20220623135520057.png" alt="image-20220623135520057" />
+       –&gt; 3+d: xyz position + other per-point features (e.g. RGB or other intermediate learned features)</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Objective
+   ​	**Encode xyz coordinates of all neighbouring points for each point to aware of relative spatial locations.**
+   Steps:
+    1. Finding neighbouring points
+          for $ith$ point, gather neighbouring points by $KNN$ for efficiency, based on Euclidean distances.
+   2. Relative Point Position encoding
+        concatenate the xyz positions of ith points, neighbour k of ith points, element-wise subtraction, Euclidean distance of two points
+   3. Point Feature Augmentation
+        Concatenate relative point position with corresponding point features f.
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>2.Attentive pooling
+     Objective
+     ​	Aggregate the set of neighbouring point features f, use attention mechanism to automatically learn important local features.
+     Steps: 
+          1.Computing Attention Scores
+          2.Weighted Summation
+          3.dilated residual block</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ​    
+</code></pre></div></div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Point Clouds" /><category term="Notes" /><summary type="html"><![CDATA[Abstract: Notes for Architecture and building blocks for the RandLA which is implemented in the experiment]]></summary></entry><entry><title type="html">Point Cloud Visualization Utils</title><link href="http://localhost:4000/2022/06/22/point-cloud-visualization-utils.html" rel="alternate" type="text/html" title="Point Cloud Visualization Utils" /><published>2022-06-22T19:23:16+08:00</published><updated>2022-06-22T19:23:16+08:00</updated><id>http://localhost:4000/2022/06/22/point-cloud-visualization-utils</id><content type="html" xml:base="http://localhost:4000/2022/06/22/point-cloud-visualization-utils.html"><![CDATA[<ol>
+  <li>Codes for visualizing point clouds (without labels)</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">pyvista</span> <span class="k">as</span> <span class="n">pv</span>
+<span class="n">pv</span><span class="p">.</span><span class="nf">start_xvfb</span><span class="p">()</span> <span class="c1"># start a session
+</span>
+<span class="n">point_clouds</span> <span class="o">=</span> <span class="nc">ShapeNet</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="sh">'</span><span class="s">../dataset/shapenet</span><span class="sh">'</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="sh">'</span><span class="s">trainval</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">pcd</span> <span class="o">=</span> <span class="n">point_clouds</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">pos</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">detach</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span> <span class="c1"># pick a specific point cloud data from the dataset
+</span><span class="n">points</span> <span class="o">=</span> <span class="n">pv</span><span class="p">.</span><span class="nc">PolyData</span><span class="p">(</span><span class="n">pcd</span><span class="p">)</span> <span class="c1"># plot the dataset
+</span><span class="n">points</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">jupyter_backend</span><span class="o">=</span><span class="sh">'</span><span class="s">panel</span><span class="sh">'</span><span class="p">)</span> <span class="c1"># set the visualization interactive
+</span>
+</code></pre></div></div>
+
+<!-- more -->]]></content><author><name></name></author><category term="Memo" /><summary type="html"><![CDATA[Codes for visualizing point clouds (without labels)]]></summary></entry></feed>

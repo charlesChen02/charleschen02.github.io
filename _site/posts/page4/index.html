@@ -6,11 +6,20 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+        }
+    });
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
   <title>
-    About - Charles&#39; Idea Warehourse
+    Posts - Charles&#39; Idea Warehourse
     
   </title>
-  <link rel="stylesheet" href="/assets/css/syntax.css">
+
   <meta name="description" content="Ideas come from thinking different.🌿">
 
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
@@ -19,7 +28,7 @@
   <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" href="/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/about/">
+  <link rel="canonical" href="http://localhost:4000/posts/page4/">
   <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
 
 </head>
@@ -57,14 +66,14 @@
 
   <!-- Page Header -->
 
-  <header class="masthead">
-    
+<header class="masthead" style="background-image: url('/img/bg-post.jpg')">
+  
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="page-heading">
-            <h1>About</h1>
+            <h1>Posts</h1>
             
           </div>
         </div>
@@ -76,23 +85,96 @@
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
 
-        <center />
-<font size="50"> Charles Chen🌿 </font>
+        
 
-<center />
-<p>🎓 Australian National University</p>
+<article class="post-preview">
+  <a href="/2022/05/30/SqueezeSeg-Source-Code-Read.html">
+    <h2 class="post-title">RangeNet++ and SqueezeSegv3 网络架构阅读分析</h2>
+    
+    <h3 class="post-subtitle">
+  Update: 因为发现了squeezeSegv3其实是基于rangeNet++的一个整体框架上的一个小优化, 而且v3的资源消耗远远大于RangeNet++, 在单台服务器上的部署几乎不可行, 所以后来主要在研究使用rangeNet++搭配不同的backbone.
 
-<center />
-<p>🏫 University of Melbourne</p>
+</h3>
+    
+  </a>
+  <p class="post-meta">Posted by
+    
+    
+    
+    on May 30, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   8 mins  read </span>
 
-<center />
-<p><b>💼 Working in a nameless ICT Company</b></p>
+  </p>
+</article>
 
-<center />
-<p>Keep zeal.🔥</p>
+<hr>
 
-<center />
-<p>Stay humble.</p>
+
+
+<article class="post-preview">
+  <a href="/2022/05/26/Redis-Study-Notes.html">
+    <h2 class="post-title">Redis 基础学习笔记</h2>
+    
+    <h3 class="post-subtitle">Introduction
+</h3>
+    
+  </a>
+  <p class="post-meta">Posted by
+    
+    
+    
+    on May 26, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   9 mins  read </span>
+
+  </p>
+</article>
+
+<hr>
+
+
+
+<article class="post-preview">
+  <a href="/2022/05/25/Build-a-new-Blog.html">
+    <h2 class="post-title">使用hexo建立新的博客</h2>
+    
+    <h3 class="post-subtitle">
+  Abstract: 从零开始搭建一个个人博客的快速教程!
+
+</h3>
+    
+  </a>
+  <p class="post-meta">Posted by
+    
+    
+    
+    on May 25, 2022 &middot; <span class="reading-time" title="Estimated read time">
+  
+   3 mins  read </span>
+
+  </p>
+</article>
+
+<hr>
+
+
+
+<!-- Pager -->
+
+
+<div class="clearfix">
+
+  
+  <a class="btn btn-primary float-left" href="/posts/page3/">&larr;
+    Newer<span class="d-none d-md-inline"> Posts</span></a>
+  
+
+  
+
+</div>
+
+
 
 
       </div>
@@ -160,13 +242,13 @@
 
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXXXX-X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', '');
+  gtag('config', 'UA-XXXXXXXXX-X');
 </script>
 
 

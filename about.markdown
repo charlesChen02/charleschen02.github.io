@@ -1,7 +1,8 @@
 ---
 layout: page
 title: About
-permalink: /about/
+description: This is what I do.
+background: '/img/bg-about.jpg'
 ---
 
 <center/><font size=50> Charles Chen🌿 </font>

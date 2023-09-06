@@ -6,6 +6,8 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
@@ -91,7 +93,7 @@
               <a href="#"></a>
               on September 05, 2023 &middot; <span class="reading-time" title="Estimated read time">
   
-   1 min  read </span>
+   2 mins  read </span>
 
             </span>
           </div>
@@ -184,6 +186,89 @@ $ cd my-site
 </code></pre></div></div>
 <p>完成后就可以在 http://127.0.0.1:4000/ 查看jekyll的默认站点的样子了.</p>
 
+<h1 id="创建一篇post">创建一篇post</h1>
+
+<p>当使用上面的命令创建了新站点文件之后, 内部的文件通常包含了一个叫做 <code class="language-plaintext highlighter-rouge">_post</code> 的文件夹, 这就是jekyll用来存放具体博客的位置.</p>
+
+<p>一般情况下, jekyll的post名称要求是使用 <code class="language-plaintext highlighter-rouge">YYYY-MM-DD-Title</code> 的格式进行命名, 同时在所创建的文件内部需要添加头部信息, 类似下面的:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+---
+layout: post
+title:  "这是一个标题"
+date:   2023-09-05 10:50:38 +0800
+
+---
+
+</code></pre></div></div>
+
+<p>其中这里面 <code class="language-plaintext highlighter-rouge">layout</code> 定义了这个页面的格式, 可以在站点根目录下<code class="language-plaintext highlighter-rouge">_layout</code> 文件夹中创建对应的格式文件.</p>
+
+<h2 id="自动化创建一篇post">自动化创建一篇post</h2>
+
+<p>毕竟手动创建并填写这些东西实在是太麻烦了, 所以我们可以通过一个<code class="language-plaintext highlighter-rouge">gem</code>插件实现使用命令行自动创建一篇post并且自动填好这些基本的信息:</p>
+
+<p>在站点根目录的 <code class="language-plaintext highlighter-rouge">Gemfile</code> 中, 添加:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'thor'
+gem 'stringex'
+</code></pre></div></div>
+
+<p>执行命令</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+bundle install
+
+</code></pre></div></div>
+
+<p>在根目录下创建一个<code class="language-plaintext highlighter-rouge">jekyll.thor</code>的文件, 并写入下面的内容:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>require "stringex"
+class Jekyll &lt; Thor
+  desc "new", "create a new post"
+  method_option :editor, :default =&gt; "subl"
+  def new(*title)
+    title = title.join(" ")
+    date = Time.now.strftime('%Y-%m-%d')
+    filename = "_posts/#{date}-#{title.to_url}.markdown"
+
+    if File.exist?(filename)
+      abort("#{filename} already exists!")
+    end
+
+    puts "Creating new post: #{filename}"
+    open(filename, 'w') do |post|
+      post.puts "---"
+      post.puts "layout: post"
+      post.puts "title: \"#{title.gsub(/&amp;/,'&amp;amp;')}\""
+      post.puts "tags:"
+      post.puts " -"
+      post.puts "---"
+    end
+
+    system(options[:editor], filename)
+  end
+end
+
+</code></pre></div></div>
+
+<p>简单来说, 这就是一个thor脚本, 需要输入title参数, 并且根据今日日期自动填写其他的内容</p>
+
+<p>做完上面这些东西后, 我们可以使用命令:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ thor jekyll:new title of the new post
+
+</code></pre></div></div>
+
+<p>进行新post的创建了.</p>
+
+<h2 id="插入图片">插入图片</h2>
+
+<p>可以使用</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;img src="" alt="" style="max-width:100%; height:auto;"&gt;
+</code></pre></div></div>
+<p>来将md文件中的图像限定为和页面一样宽</p>
 
 
         <hr>
@@ -194,6 +279,9 @@ $ cd my-site
           <a class="btn btn-primary float-left" href="/2023/09/01/shapePredictor.html" data-toggle="tooltip" data-placement="top" title="ShapePredictor 原理分析">&larr; Previous<span class="d-none d-md-inline">
               Post</span></a>
           
+          
+          <a class="btn btn-primary float-right" href="/2023/09/06/YOWO-Notes.html" data-toggle="tooltip" data-placement="top" title="YOWO 调研笔记">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
           
 
         </div>

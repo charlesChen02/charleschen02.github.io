@@ -73,6 +73,10 @@
 <lastmod>2023-09-05T10:50:38+08:00</lastmod>
 </url>
 <url>
+<loc>http://localhost:4000/2023/09/06/YOWO-Notes.html</loc>
+<lastmod>2023-09-06T00:00:00+08:00</lastmod>
+</url>
+<url>
 <loc>http://localhost:4000/about.html</loc>
 </url>
 <url>
@@ -86,11 +90,5 @@
 </url>
 <url>
 <loc>http://localhost:4000/posts/page2/</loc>
-</url>
-<url>
-<loc>http://localhost:4000/posts/page3/</loc>
-</url>
-<url>
-<loc>http://localhost:4000/posts/page4/</loc>
 </url>
 </urlset>

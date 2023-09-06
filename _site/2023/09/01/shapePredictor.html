@@ -6,6 +6,8 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
@@ -108,7 +110,7 @@
 
 <p>Dlib 库中的 shape predictor 是基于论文： One Millisecond Face Alignment with an Ensemble of Regression Trees 中提出的 ERT(Ensemble of Regression Trees) 级联回归树进行实现的, 通过进行特征选择并最小化损失函数.</p>
 
-<p><img src="intro.png" alt="" /></p>
+<p><img src="intro.png" alt="" style="max-width:100%; height:auto;" /></p>
 
 <!-- more -->
 
@@ -187,13 +189,12 @@
 
 <p>具体细节可以看原论文.</p>
 
-<p><img src="image.png" alt="" /></p>
-
+<p><img src="image.png" alt="" style="max-width:100%; height:auto;" /></p>
 <h1 id="结语">结语</h1>
 
 <p>该算法给dlib库中的shape predictor提供了理论基础, 并且在dlib中最终选择使用68个landmark来让上文的级联回归树进行拟合, 在原文中也测试了400, 200, 80, 40, 20 等不同数量的初始形状数量.</p>
 
-<p><img src="conclu.png" alt="" /></p>
+<p><img src="conclu.png" alt="" style="max-width:100%; height:auto;" /></p>
 
 
 

@@ -12,8 +12,7 @@ date: 2023-09-01 14:21:35
 
 Dlib 库中的 shape predictor 是基于论文： One Millisecond Face Alignment with an Ensemble of Regression Trees 中提出的 ERT(Ensemble of Regression Trees) 级联回归树进行实现的, 通过进行特征选择并最小化损失函数.
 
-![](intro.png)
-
+<img src="intro.png" alt="" style="max-width:100%; height:auto;">
 
 <!-- more -->
 
@@ -103,13 +102,15 @@ $$
 具体细节可以看原论文.
 
 
-![](image.png)
 
+<img src="image.png" alt="" style="max-width:100%; height:auto;">
 # 结语
 
 该算法给dlib库中的shape predictor提供了理论基础, 并且在dlib中最终选择使用68个landmark来让上文的级联回归树进行拟合, 在原文中也测试了400, 200, 80, 40, 20 等不同数量的初始形状数量.
 
-![](conclu.png)
+
+<img src="conclu.png" alt="" style="max-width:100%; height:auto;">
+
 
 
 

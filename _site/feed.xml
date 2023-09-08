@@ -1,4 +1,117 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-09-06T14:25:59+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Charles’ Idea Warehourse</title><subtitle>Ideas come from thinking different.🌿</subtitle><entry><title type="html">YOWO 调研笔记</title><link href="http://localhost:4000/2023/09/06/YOWO-Notes.html" rel="alternate" type="text/html" title="YOWO 调研笔记" /><published>2023-09-06T00:00:00+08:00</published><updated>2023-09-06T00:00:00+08:00</updated><id>http://localhost:4000/2023/09/06/YOWO-Notes</id><content type="html" xml:base="http://localhost:4000/2023/09/06/YOWO-Notes.html"><![CDATA[<h1 id="前言">前言</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-09-08T11:37:41+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Charles’ Idea Warehourse</title><subtitle>Ideas come from thinking different.🌿</subtitle><entry><title type="html">刷题笔记</title><link href="http://localhost:4000/2023/09/08/coding-notes.html" rel="alternate" type="text/html" title="刷题笔记" /><published>2023-09-08T00:00:00+08:00</published><updated>2023-09-08T00:00:00+08:00</updated><id>http://localhost:4000/2023/09/08/coding-notes</id><content type="html" xml:base="http://localhost:4000/2023/09/08/coding-notes.html"><![CDATA[<h1 id="2023">2023</h1>
+
+<h2 id="sep">Sep</h2>
+
+<h3 id="08">08</h3>
+
+<p><strong>128.最长连续序列</strong></p>
+<blockquote>
+  <p>难度: Leetcode中等</p>
+</blockquote>
+
+<blockquote>
+  <p>给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>
+</blockquote>
+
+<blockquote>
+  <p>请你设计并实现时间复杂度为 O(n) 的算法解决此问题。</p>
+</blockquote>
+
+<p>思路: <em>枚举+哈希表</em> 用哈希表记录组内元素, 以每一个元素作为开头进行枚举, 计算以当前元素为起始的最长的连续序列长度. 为了方式重复计算, 会额外判断当前数字的前序数是否已经存在, 即只会以每一个连续序列的最小数作为起始开始计算.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">longestConsecutive</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                <span class="n">cur</span> <span class="o">=</span> <span class="n">a</span>
+                <span class="n">cres</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="n">cur</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                    <span class="n">cres</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">cur</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">cres</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></div>
+
+<p><strong>G - Sqrt</strong></p>
+
+<blockquote>
+  <p>纯鉴赏, 争取早日上瓜</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>难度:2032
+输入 T(≤20) 表示 T 组数据。
+每组数据输入 X(1≤X≤9e18)。
+请构造一个长为 10^100 的数组 a，满足：
+1. a[i] 均为正整数。
+2. a[0] = X。
+3. a[i] * a[i] &lt;= a[i-1]。
+输出你可以构造出多少个不同的数组。
+
+输入
+4
+16
+1
+123456789012
+1000000000000000000
+
+输出
+5
+1
+4555793983
+23561347048791096
+
+</code></pre></div></div>
+
+<p>思路:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>下标从 0 开始。
+
+提示 1：
+枚举 a[2]，那么 a[1] 的范围就确定了。
+设 m = floor(sqrt(a[0]))。
+那么 a[1] 的范围就是 [a[2]*a[2], m]，这一共有 m-a[2]*a[2]+1 个数，这些数都可以是 a[1]。
+
+提示 2：
+定义 f[i] 表示序列的首项为 i 时，可以构造出多少个不同的数组。
+根据提示 1，有
+f[i] = sum(f[j] * (m-j*j+1))，这里 1 &lt;= j &lt;= sqrt(m)。
+
+提示 3：
+预处理出 f[1] 到 f[54772]，就可以直接用上式算出 f[X]。这里 54772 = floor(pow(9e18, 0.25))。
+预处理可以不用像上式那样复杂，枚举 a[1]，可以得到
+f[i] = sum(f[j])，这里 1 &lt;= j &lt;= sqrt(i)。
+这个式子又可以化简成
+f[i] = f[i-1] + (i 是完全平方数 ? f[floor(sqrt(i))] : 0)
+
+https://atcoder.jp/contests/abc243/submissions/45083883
+</code></pre></div></div>
+
+<p>题解:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">'</span><span class="s">__main__</span><span class="sh">'</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">55000</span><span class="p">)],</span> <span class="mi">2</span>
+    <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">f</span><span class="p">)):</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">int</span><span class="p">(</span><span class="nf">input</span><span class="p">())):</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">ans</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">input</span><span class="p">()),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">*</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">v</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+
+</code></pre></div></div>]]></content><author><name></name></author><summary type="html"><![CDATA[2023]]></summary></entry><entry><title type="html">YOWO 调研笔记</title><link href="http://localhost:4000/2023/09/06/YOWO-Notes.html" rel="alternate" type="text/html" title="YOWO 调研笔记" /><published>2023-09-06T00:00:00+08:00</published><updated>2023-09-06T00:00:00+08:00</updated><id>http://localhost:4000/2023/09/06/YOWO-Notes</id><content type="html" xml:base="http://localhost:4000/2023/09/06/YOWO-Notes.html"><![CDATA[<h1 id="前言">前言</h1>
 
 <p>行为识别目前还是一项比较新的课题, 因为对于行为的检测通常涉及视频流中的图像时序信息. 相比于 2D Conv, 直接使用3D conv进行的训练并不能很好的保持模型的实时性, 因此基于此的项目落地比较困难. 针对目前的实时行为检测的问题, 比较精炼的解决方法如 SlowFast 通过使用两条pathway分别提取慢信息和快信息并合成得到结果, X3D 通过基于2D卷积模型,在不同维度上进行分别的升维测试, 得到了低参数量且高性能的实时视频分类模型.</p>
 
@@ -101,7 +214,7 @@ Params : 121.09 M
 </code></pre></div></div>
 <p>整体的参数量还是比较大的.</p>
 
-<p>2,  YOWO能够实时运行, 主要归功于他将输入修改为了 $224 \imtes 224$ 这么小的尺寸, 但是这样容易丢失一些图像细节, 容易丢失较小的动作细节</p>
+<p>2,  YOWO能够实时运行, 主要归功于他将输入修改为了 $224 \times 224$ 这么小的尺寸, 但是这样容易丢失一些图像细节, 容易丢失较小的动作细节</p>
 
 <p>3, 本质上还是一个 two-stream 模型, 只是将原本的光流换成了 3D CNN.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[前言]]></summary></entry><entry><title type="html">Mac系统使用jekyll创建一个博客</title><link href="http://localhost:4000/2023/09/05/use-jekyll-to-build-blog.html" rel="alternate" type="text/html" title="Mac系统使用jekyll创建一个博客" /><published>2023-09-05T10:50:38+08:00</published><updated>2023-09-05T10:50:38+08:00</updated><id>http://localhost:4000/2023/09/05/use-jekyll-to-build-blog</id><content type="html" xml:base="http://localhost:4000/2023/09/05/use-jekyll-to-build-blog.html"><![CDATA[<p>因为hexo版本更新后总是有各种各样的问题，所以终于决定把现有的博客换掉了，目前的计划是使用jekyll</p>
 
@@ -455,7 +568,9 @@ end
 
 <h1 id="基于-dlib-实现的人脸识别框架">基于 <code class="language-plaintext highlighter-rouge">Dlib</code> 实现的人脸识别框架</h1>
 
-<p>TBC</p>]]></content><author><name></name></author><summary type="html"><![CDATA[前言]]></summary></entry><entry><title type="html">Terraform 基础使用方法与特性</title><link href="http://localhost:4000/2023/04/06/Terraform.html" rel="alternate" type="text/html" title="Terraform 基础使用方法与特性" /><published>2023-04-06T16:37:31+08:00</published><updated>2023-04-06T16:37:31+08:00</updated><id>http://localhost:4000/2023/04/06/Terraform</id><content type="html" xml:base="http://localhost:4000/2023/04/06/Terraform.html"><![CDATA[<h1 id="general">General</h1>
+<h2 id="背景与思路">背景与思路</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Dlib</code> 本身是一个基于C++实现的CV深度学习库, 并且也提供了很多有用的预训练模型给python. 在实际的项目开发中, 主要使用了RetinaFace作为面部检测模型, 在定位后使用Dlib库中<code class="language-plaintext highlighter-rouge">ShapePredictor</code>进行人脸特征标定, 最后使用库中的deepresnetv1进行128D的特征提取.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[前言]]></summary></entry><entry><title type="html">Terraform 基础使用方法与特性</title><link href="http://localhost:4000/2023/04/06/Terraform.html" rel="alternate" type="text/html" title="Terraform 基础使用方法与特性" /><published>2023-04-06T16:37:31+08:00</published><updated>2023-04-06T16:37:31+08:00</updated><id>http://localhost:4000/2023/04/06/Terraform</id><content type="html" xml:base="http://localhost:4000/2023/04/06/Terraform.html"><![CDATA[<h1 id="general">General</h1>
 
 <h2 id="1-是什么-what-is-terraform">1. 是什么 What is Terraform?</h2>
 
@@ -1298,40 +1413,4 @@ Number of iterations run.
 
 <h2 id="truncated-svd">Truncated SVD</h2>
 
-<p>sparse data</p>]]></content><author><name></name></author><category term="t-SNE" /><category term="Machine Learning" /><category term="Visualization" /><category term="Notes" /><summary type="html"><![CDATA[Definition]]></summary></entry><entry><title type="html">RandLA Network Analysis</title><link href="http://localhost:4000/2022/06/23/RandLA-reading-Notes.html" rel="alternate" type="text/html" title="RandLA Network Analysis" /><published>2022-06-23T21:44:52+08:00</published><updated>2022-06-23T21:44:52+08:00</updated><id>http://localhost:4000/2022/06/23/RandLA-reading-Notes</id><content type="html" xml:base="http://localhost:4000/2022/06/23/RandLA-reading-Notes.html"><![CDATA[<blockquote>
-  <p>Abstract: Notes for Architecture and building blocks for the RandLA which is implemented in the experiment</p>
-</blockquote>
-
-<!-- more -->
-
-<h1 id="building-blocks">Building Blocks</h1>
-<ol>
-  <li>
-    <p>Local feature aggregation
-  1.Local Spatial encoding (LocSE)
-       <img src="./image-20220623135520057.png" alt="image-20220623135520057" />
-       –&gt; 3+d: xyz position + other per-point features (e.g. RGB or other intermediate learned features)</p>
-
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   Objective
-   ​	**Encode xyz coordinates of all neighbouring points for each point to aware of relative spatial locations.**
-   Steps:
-    1. Finding neighbouring points
-          for $ith$ point, gather neighbouring points by $KNN$ for efficiency, based on Euclidean distances.
-   2. Relative Point Position encoding
-        concatenate the xyz positions of ith points, neighbour k of ith points, element-wise subtraction, Euclidean distance of two points
-   3. Point Feature Augmentation
-        Concatenate relative point position with corresponding point features f.
-</code></pre></div>    </div>
-  </li>
-</ol>
-
-<p>2.Attentive pooling
-     Objective
-     ​	Aggregate the set of neighbouring point features f, use attention mechanism to automatically learn important local features.
-     Steps: 
-          1.Computing Attention Scores
-          2.Weighted Summation
-          3.dilated residual block</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ​    
-</code></pre></div></div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Point Clouds" /><category term="Notes" /><summary type="html"><![CDATA[Abstract: Notes for Architecture and building blocks for the RandLA which is implemented in the experiment]]></summary></entry></feed>
+<p>sparse data</p>]]></content><author><name></name></author><category term="t-SNE" /><category term="Machine Learning" /><category term="Visualization" /><category term="Notes" /><summary type="html"><![CDATA[Definition]]></summary></entry></feed>

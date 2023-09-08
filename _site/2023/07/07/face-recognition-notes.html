@@ -208,7 +208,9 @@
 
 <h1 id="基于-dlib-实现的人脸识别框架">基于 <code class="language-plaintext highlighter-rouge">Dlib</code> 实现的人脸识别框架</h1>
 
-<p>TBC</p>
+<h2 id="背景与思路">背景与思路</h2>
+
+<p><code class="language-plaintext highlighter-rouge">Dlib</code> 本身是一个基于C++实现的CV深度学习库, 并且也提供了很多有用的预训练模型给python. 在实际的项目开发中, 主要使用了RetinaFace作为面部检测模型, 在定位后使用Dlib库中<code class="language-plaintext highlighter-rouge">ShapePredictor</code>进行人脸特征标定, 最后使用库中的deepresnetv1进行128D的特征提取.</p>
 
 
 

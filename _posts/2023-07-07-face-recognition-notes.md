@@ -116,6 +116,8 @@ def distance(embeddings1, embeddings2, distance_metric=0):
 
 # 基于 `Dlib` 实现的人脸识别框架
 
+## 背景与思路
 
-TBC
+`Dlib` 本身是一个基于C++实现的CV深度学习库, 并且也提供了很多有用的预训练模型给python. 在实际的项目开发中, 主要使用了RetinaFace作为面部检测模型, 在定位后使用Dlib库中`ShapePredictor`进行人脸特征标定, 最后使用库中的deepresnetv1进行128D的特征提取.
+
 

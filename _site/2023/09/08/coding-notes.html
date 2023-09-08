@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+        }
+    });
+  </script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  <title>
+    刷题笔记 - Charles&#39; Idea Warehourse
+    
+  </title>
+
+  <meta name="description" content="2023">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2023/09/08/coding-notes.html">
+  <link rel="alternate" type="application/rss+xml" title="Charles&#39; Idea Warehourse" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">Charles&#39; Idea Warehourse</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+  <header class="masthead">
+    
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script> 
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          processEscapes: true
+        }
+      };
+      </script>
+      
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>刷题笔记</h1>
+            
+            <span class="meta">Posted by
+              <a href="#"></a>
+              on September 08, 2023 &middot; <span class="reading-time" title="Estimated read time">
+  
+   3 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <h1 id="2023">2023</h1>
+
+<h2 id="sep">Sep</h2>
+
+<h3 id="08">08</h3>
+
+<p><strong>128.最长连续序列</strong></p>
+<blockquote>
+  <p>难度: Leetcode中等</p>
+</blockquote>
+
+<blockquote>
+  <p>给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>
+</blockquote>
+
+<blockquote>
+  <p>请你设计并实现时间复杂度为 O(n) 的算法解决此问题。</p>
+</blockquote>
+
+<p>思路: <em>枚举+哈希表</em> 用哈希表记录组内元素, 以每一个元素作为开头进行枚举, 计算以当前元素为起始的最长的连续序列长度. 为了方式重复计算, 会额外判断当前数字的前序数是否已经存在, 即只会以每一个连续序列的最小数作为起始开始计算.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">longestConsecutive</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                <span class="n">cur</span> <span class="o">=</span> <span class="n">a</span>
+                <span class="n">cres</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="n">cur</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                    <span class="n">cres</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">cur</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">cres</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></div>
+
+<p><strong>G - Sqrt</strong></p>
+
+<blockquote>
+  <p>纯鉴赏, 争取早日上瓜</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>难度:2032
+输入 T(≤20) 表示 T 组数据。
+每组数据输入 X(1≤X≤9e18)。
+请构造一个长为 10^100 的数组 a，满足：
+1. a[i] 均为正整数。
+2. a[0] = X。
+3. a[i] * a[i] &lt;= a[i-1]。
+输出你可以构造出多少个不同的数组。
+
+输入
+4
+16
+1
+123456789012
+1000000000000000000
+
+输出
+5
+1
+4555793983
+23561347048791096
+
+</code></pre></div></div>
+
+<p>思路:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>下标从 0 开始。
+
+提示 1：
+枚举 a[2]，那么 a[1] 的范围就确定了。
+设 m = floor(sqrt(a[0]))。
+那么 a[1] 的范围就是 [a[2]*a[2], m]，这一共有 m-a[2]*a[2]+1 个数，这些数都可以是 a[1]。
+
+提示 2：
+定义 f[i] 表示序列的首项为 i 时，可以构造出多少个不同的数组。
+根据提示 1，有
+f[i] = sum(f[j] * (m-j*j+1))，这里 1 &lt;= j &lt;= sqrt(m)。
+
+提示 3：
+预处理出 f[1] 到 f[54772]，就可以直接用上式算出 f[X]。这里 54772 = floor(pow(9e18, 0.25))。
+预处理可以不用像上式那样复杂，枚举 a[1]，可以得到
+f[i] = sum(f[j])，这里 1 &lt;= j &lt;= sqrt(i)。
+这个式子又可以化简成
+f[i] = f[i-1] + (i 是完全平方数 ? f[floor(sqrt(i))] : 0)
+
+https://atcoder.jp/contests/abc243/submissions/45083883
+</code></pre></div></div>
+
+<p>题解:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">'</span><span class="s">__main__</span><span class="sh">'</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">55000</span><span class="p">)],</span> <span class="mi">2</span>
+    <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">f</span><span class="p">)):</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">int</span><span class="p">(</span><span class="nf">input</span><span class="p">())):</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">ans</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="nf">input</span><span class="p">()),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">*</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">v</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">ans</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2023/09/06/YOWO-Notes.html" data-toggle="tooltip" data-placement="top" title="YOWO 调研笔记">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:cy759386006@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li class="list-inline-item">
+            <a href="https://twitter.com/charlesc1224">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/charlesChen02">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/scripts.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXXXXXX-X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-XXXXXXXXX-X');
+</script>
+
+
+
+</body>
+
+</html>
